@@ -1,19 +1,7 @@
-var sys = require('sys')
-
-var options = {
-	server:	'irc.webdevrefinery.com',
-	port:	6677,
-	nick:	'callum',
-	user: {
-		username:	'callumacrae',
-		hostname:	'what.is.this',
-		servername:	'nodeXB1',
-		realname:		'Node XB'
-	}
-};
-
-var IRC = require('./lib/lib')
-var irc = new IRC(options);
+var sys = require('sys'),
+	options = require('./test.config'),
+	IRC = require('./lib/lib'),
+	irc = new IRC(options);
 
 function handle_commands(message)
 {
@@ -25,7 +13,7 @@ function handle_commands(message)
 			break;
 		
 		case "identify":
-			irc.privmsg('NickServ', 'IDENTIFY callumacrae ')
+			irc.privmsg('NickServ', 'IDENTIFY ' + options.user.pass)
 			break;
 		
 		case "say":
