@@ -7,6 +7,34 @@ var sys = require('sys'),
 
 irc.connect()
 
+function handle_msg(data)
+{
+	if (data.msg == undefined || data.chan == undefined)
+	{
+		return false
+	}
+
+	if (data.msg.slice(0, 1) == '/' && data.msg.slice(0, 2) != '//')
+	{
+		var command = data.msg.slice(1, data.msg.indexOf(' '));
+		switch (command)
+		{
+			case "join":
+				if (data.msg.indexOf(' ', data.msg.indexOf(' ') + 1) !== -1)
+					var end = data.msg.indexOf(' ', data.msg.indexOf(' ') + 1)
+				else
+					var end = data.msg.length
+				var channel = data.msg.slice(data.msg.indexOf(' '), end)
+				irc.join(channel)
+				console.log(data.msg.indexOf(' ', data.msg.indexOf(' ')))
+		}
+	}
+	else
+	{
+		irc.privmsg(data.chan, data.msg)
+	}
+}
+
 var http = require('http');
 http.createServer(function (req, res)
 {
@@ -19,10 +47,7 @@ http.createServer(function (req, res)
 			req.addListener("data", function(data)
 			{
 				data = querystring.parse(data)
-				if (data.msg !== undefined && data.chan !== undefined)
-				{
-					irc.privmsg(data.chan, data.msg)
-				}
+				handle_msg(data)
 			});
 			//no break
 
