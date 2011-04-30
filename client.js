@@ -3,9 +3,11 @@ var sys = require('sys'),
 	IRC = require('./lib/lib'),
 	irc = new IRC(options),
 	url = require('url'),
-	querystring = require('querystring');
-
-irc.connect()
+	querystring = require('querystring'),
+	io = require('socket.io'),
+	http = require('http'),  
+	path = require('path'),
+	fs = require('fs');
 
 function handle_msg(data)
 {
@@ -43,30 +45,48 @@ function handle_msg(data)
 	}
 }
 
-var http = require('http');
-http.createServer(function (req, res)
+server = http.createServer(function (req, res)
 {
-	res.writeHead(200, {'Content-Type': 'text/html'})
 	req.setEncoding('utf8')
 	
-	switch (req.url)
-	{
-		case '/submit':
-			req.addListener("data", function(data)
-			{
-				data = querystring.parse(data)
-				handle_msg(data)
-			});
-			//no break
+	if (req.url == '/')
+		var filename = path.join(process.cwd(), 'html/index.html')
+	else
+		var filename = path.join(process.cwd(), 'html/' + url.parse(req.url).pathname)
+	
+	path.exists(filename, function(exists)
+	{  
+		if (!exists)
+		{  
+			res.writeHeader(404, {"Content-Type": "text/plain"})
+			res.end("404 Not Found\n")
+			return
+		}  
+	
+		fs.readFile(filename, "binary", function(err, file)
+		{  
+			if(err)
+			{  
+				res.writeHeader(500, {"Content-Type": "text/plain"})
+				res.end(err + "\n")
+				return
+			}  
+	
+			res.writeHeader(200)
+			res.end(file, "binary")
+		})
+	})
+})
+server.listen(1337, "127.0.0.1")
 
-		case '/':
-			res.end(
-				'<form action="/submit" method="post">'+
-				'<input type="text" name="msg">'+
-				'<input type="hidden" name="chan" value="#test" />'+
-				'<input type="submit" value="Submit">'+
-				'</form>'
-			);
-			break;
-	}
-}).listen(1337, "127.0.0.1");
+var socket = io.listen(server);
+socket.on('connection', function(client)
+{
+	irc.connect()
+	console.client = client //horrible global!
+	client.on('message', handle_msg)
+	client.on('disconnect', function()
+	{
+		irc.quit('https://github.com/callumacrae/irc-js/')
+	}) 
+});
