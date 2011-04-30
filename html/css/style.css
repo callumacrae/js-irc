@@ -163,12 +163,34 @@ a:hover { color: #036; }
 
 
 /**
- * Primary styles
- *
- * Author: 
+ * Primary style
  */
 
+header {
+  width: 100%;
+  height: 20px;
+  position: fixed;
+  top: 0px;
+  border-bottom: 1px black solid;
+  text-align: center;
+  padding-top: 4px;
+  background-color: white;
+}
 
+footer {
+  width: 100%;
+  height: 20px;
+  position: fixed;
+  bottom: 0px;
+}
+footer #msginput {
+  width: 100%;
+}
+
+div #main {
+  padding-top: 35px;
+  padding-bottom: 25px;
+}
 
 
 

@@ -21,17 +21,77 @@
 
   <div id="container">
     <header>
-
+      <strong>#lynxphp:</strong> Topic here
     </header>
     <div id="main" role="main">
-	<form onSubmit="send_msg(this); return false">
-		<input type="text" name="msg">
-		<input type="hidden" name="chan" value="#lynxphp" />
-		<input type="submit" value="Submit">
-	</form>
+      <ul id="#lynxphp">
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+	<li><strong>Callum:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> How are you all today?</li>
+	<li><strong>Pierre:</strong> Hello world!</li>
+	<li><strong>Callum:</strong> What?!</li>
+	<li><strong>Cat:</strong> MEIAAAOOOOOW!</li>
+      </ul>
     </div>
     <footer>
-
+	<form onSubmit="send_msg(this); return false">
+		<input type="text" name="msg" id="msginput">
+		<input type="hidden" name="chan" value="#lynxphp" />
+	</form>
     </footer>
   </div>
 
@@ -43,7 +103,20 @@
     socket.connect();
     socket.on('message', function(data)
     {
-      alert(data)
+      info = /:([0-9a-zA-Z[]\`_^{|}]+)![0-9a-zA-Z[]\`_^{|}]+@[0-9a-zA-Z.-]+ JOIN :(.+)/.exec(data)
+      if (info)
+      {
+	alert('You have joined ' + info[2])
+	return;
+      }
+      
+      info = /:([0-9a-zA-Z[]\`_^{|}]+)![0-9a-zA-Z[]\`_^{|}]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.+)/.exec(data)
+      if (info)
+      {
+	document.getElementById(info[2]).innerHTML += '<li><strong>' + info[1] + '</strong>: ' + info[3] + '</li>';
+	window.scrollBy(0, 15);
+	return;
+      }
     }) 
     socket.on('disconnect', function()
     {

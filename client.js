@@ -43,6 +43,7 @@ function handle_msg(data)
 	{
 		irc.privmsg(data.chan, data.msg)
 	}
+	return true
 }
 
 server = http.createServer(function (req, res)
