@@ -83,8 +83,8 @@ server.listen(1337, "127.0.0.1")
 var socket = io.listen(server);
 socket.on('connection', function(client)
 {
-	irc.connect()
 	console.client = client //horrible global!
+	irc.connect()
 	client.on('message', handle_msg)
 	client.on('disconnect', function()
 	{

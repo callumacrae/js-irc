@@ -175,6 +175,7 @@ header {
   text-align: center;
   padding-top: 4px;
   background-color: white;
+  z-index: 999;
 }
 
 footer {
@@ -190,6 +191,29 @@ footer #msginput {
 div #main {
   padding-top: 35px;
   padding-bottom: 25px;
+  margin-left: 140px;
+}
+
+div #left_chans {
+  height: 100%;
+  width: 130px;
+  position: absolute;
+  left: 0px;
+  top: 25px;
+  padding: 5px;
+  margin-bottom: 25px;
+  border-right: 1px black solid;
+}
+
+div #right_names {
+  height: 100%;
+  width: 130px;
+  position: absolute;
+  right: 0px;
+  top: 25px;
+  padding: 5px;
+  margin-bottom: 25px;
+  border-left: 1px black solid;
 }
 
 

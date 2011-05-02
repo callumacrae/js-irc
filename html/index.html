@@ -16,29 +16,42 @@
   <link rel="stylesheet" href="css/style.css?v=2">
   <script src="js/modernizr-1.7.min.js"></script>
 </head>
-
 <body>
-
   <div id="container">
     <header>
       <strong>#lynxphp:</strong> Topic here
     </header>
+    <div id="left_chans">
+      <strong>Channels:</strong>
+      <ul id="left_chans_ul">
+	<li><a onclick="irc.switch_chans('console')"><strong>Console</strong></a></li>
+      </ul>
+    </div>
     <div id="main" role="main">
-      <ul id="#lynxphp">
+      <ul id="console_main">
 	<li><strong>Welcome</strong> to IRC</li>
       </ul>
     </div>
+    <div id="right_names">
+      <strong>Users:</strong>
+      <ul id="lynxphp_names">
+	<li>@Callum</li>
+	<li>@What</li>
+	<li>lolbot</li>
+      </ul>
+    </div>
     <footer>
-	<form onSubmit="send_msg(this); return false">
-		<input type="text" name="msg" id="msginput">
-		<input type="hidden" name="chan" value="#lynxphp" />
-	</form>
+      <form onSubmit="irc.send_msg(this); return false">
+	<input type="text" name="msg" id="msginput">
+	<input type="hidden" name="chan" value="#lynxphp" />
+      </form>
     </footer>
   </div>
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
   <script>window.jQuery || document.write("<script src='js/jquery-1.5.1.min.js'>\x3C/script>")</script>
   <script src="http://cdn.socket.io/stable/socket.io.js"></script>
+  <script>window.io || document.write("<script src='js/socket.io.js'>\x3C/script>")</script>
   <script src="js/script.js"></script>
 
   <!--[if lt IE 7 ]>

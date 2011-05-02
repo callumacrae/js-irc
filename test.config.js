@@ -1,13 +1,12 @@
 options = {
-	server:	'irc.webdevrefinery.com',
-	port:	6677,
-	nick:	'callum',
+	server:	'irc.liquidphp.net',
+	port:	6667,
+	nick:	'cm|bot',
 	user: {
-		username:	'callumacrae',
-		hostname:	'what.is.this',
-		servername:	'nodeXB1',
-		realname:		'Node XB',
-		pass:		'' //nickserv password
+		username:	'callum',
+		hostname:	'znc.me',
+		servername:	'?',
+		realname:	'cm\'s bot'
 	}
 };
 
