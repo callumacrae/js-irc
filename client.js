@@ -1,5 +1,5 @@
 var sys = require('sys'),
-	options = require('./test.config'),
+	options = require('./config'),
 	IRC = require('./lib/lib'),
 	irc = new IRC(options),
 	url = require('url'),
