@@ -52,7 +52,7 @@ irc.send_msg = function(form)
 
 irc.switch_chans = function(chan)
 {
-	if (irc.chans[chan] === undefined)
+	if (!chan in irc.chans)
 	{
 		irc.socket.send({msg:'/join ' + chan, chan:irc.current_chan})
 		document.getElementById('main').innerHTML += '<ul id="' + irc.get_name(chan) + '_main"></ul>'
