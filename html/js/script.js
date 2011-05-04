@@ -24,7 +24,7 @@ irc.socket.on('message', function(data)
 	info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.+)/.exec(data)
 	if (info)
 	{
-		document.getElementById(get_name(info[2]) + '_main').innerHTML += '<li><strong>' + info[1] + '</strong>: ' + info[3] + '</li>';
+		document.getElementById(irc.get_name(info[2]) + '_main').innerHTML += '<li><strong>' + info[1] + '</strong>: ' + info[3] + '</li>';
 		window.scrollBy(0, 15);
 		return;
 	}
@@ -52,17 +52,17 @@ irc.send_msg = function(form)
 
 irc.switch_chans = function(chan)
 {
-	if (!chan in irc.chans)
+	if (!(chan in irc.chans))
 	{
 		irc.socket.send({msg:'/join ' + chan, chan:irc.current_chan})
-		document.getElementById('main').innerHTML += '<ul id="' + irc.get_name(chan) + '_main"></ul>'
-		document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan) + '_names"></ul>'
-		document.getElementById('left_chans_ul').innerHTML += '<li><a onclick="irc.switch_chans(\'' + irc.get_name(chan) + '\')"><strong>' + chan + '</strong></a></li>'
 		irc.chans[chan] = {
 			divname: irc.make_name(chan),
 			names: [],
 			topic: ''
 		}
+		document.getElementById('main').innerHTML += '<ul id="' + irc.get_name(chan) + '_main"></ul>'
+		document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan) + '_names"></ul>'
+		document.getElementById('left_chans_ul').innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>'
 	}
 	jQuery('#' + irc.get_name() + '_main').hide()
 	jQuery(irc.get_name(chan) + '_main').show()
@@ -79,7 +79,7 @@ irc.get_name = function(chan)
 irc.make_name = function(chan)
 {
 	name = Math.random().toString(32)
-	for (var channel in chans)
+	for (var channel in irc.chans)
 	{
 		if (channel.divname == name)
 		{
