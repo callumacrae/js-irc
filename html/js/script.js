@@ -65,7 +65,7 @@ irc.switch_chans = function(chan)
 		document.getElementById('left_chans_ul').innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>'
 	}
 	jQuery('#' + irc.get_name() + '_main').hide()
-	jQuery(irc.get_name(chan) + '_main').show()
+	jQuery('#' + irc.get_name(chan) + '_main').show()
 	irc.current_chan = chan
 }
 
