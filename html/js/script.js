@@ -87,5 +87,6 @@ irc.make_name = function(chan)
 			break
 		}
 	}
+	name = name.replace('.', '') //jQuery hates me
 	return name
 }
