@@ -6,7 +6,7 @@ irc.chans = {
 		topic: 'Welcome to Node.IRC!'
 	}
 }
-irc.current_chan = 'console'
+irc.current_chan = 'console';
 
 irc.socket = new io.Socket('127.0.0.1', {port:1337});
 irc.socket.connect();
@@ -17,14 +17,14 @@ irc.socket.on('message', function(data)
 	info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ JOIN :(.+)/.exec(data)
 	if (info)
 	{
-		irc.switch_chans(info[2])
+		irc.switch_chans(info[2]);
 		return;
 	}
 	
 	info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ PART (.+)/.exec(data)
 	if (info)
 	{
-		irc.part_chan(info[2])
+		irc.part_chan(info[2]);
 		return;
 	}
 	      
@@ -39,64 +39,64 @@ irc.socket.on('message', function(data)
 	info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ NICK :(.+)/.exec(data)
 	if (info)
 	{
-		irc.current_nick = info[1]
+		irc.current_nick = info[1];
 		return;
 	}
 })
 
 irc.socket.on('disconnect', function()
 {
-	irc.msg_to_all('Error', 'Disconnected, please reconnect.')
+	irc.msg_to_all('Error', 'Disconnected, please reconnect.');
 })
 
 irc.send_msg = function(form)
 {
-	irc.socket.send({msg:form.msg.value, chan:irc.current_chan})
-	form.msg.value = ''
-	return false
+	irc.socket.send({msg:form.msg.value, chan:irc.current_chan});
+	form.msg.value = '';
+	return false;
 }
 
 irc.msg_to_all = function(nick, msg)
 {
 	for (var chan in irc.chans)
-		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>' + nick + '</strong>: ' + msg + '</li>'
+		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>' + nick + '</strong>: ' + msg + '</li>';
 }
 
 irc.switch_chans = function(chan)
 {
 	if (!(chan in irc.chans))
 	{
-		irc.socket.send({msg:'/join ' + chan, chan:irc.current_chan})
+		irc.socket.send({msg:'/join ' + chan, chan:irc.current_chan});
 		irc.chans[chan] = {
 			divname: irc.make_name(chan),
 			names: [],
 			topic: ''
 		}
-		document.getElementById('main').innerHTML += '<ul id="' + irc.get_name(chan) + '_main"></ul>'
-		document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan) + '_names"></ul>'
-		irc.regen_chans()
+		document.getElementById('main').innerHTML += '<ul id="' + irc.get_name(chan) + '_main"></ul>';
+		document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan) + '_names"></ul>';
+		irc.regen_chans();
 	}
-	jQuery('#' + irc.get_name() + '_main').hide()
-	jQuery('#' + irc.get_name(chan) + '_main').show()
-	irc.current_chan = chan
+	jQuery('#' + irc.get_name() + '_main').hide();
+	jQuery('#' + irc.get_name(chan) + '_main').show();
+	irc.current_chan = chan;
 }
 
 irc.part_chan = function(chan)
 {
 	if (!(chan in irc.chans))
-		return false
+		return false;
 	
-	jQuery('#' + irc.get_name(chan) + '_main').remove()
-	jQuery('#' + irc.get_name(chan) + '_names').remove()
-	delete irc.chans[chan]
-	irc.regen_chans()
-	return true
+	jQuery('#' + irc.get_name(chan) + '_main').remove();
+	jQuery('#' + irc.get_name(chan) + '_names').remove();
+	delete irc.chans[chan];
+	irc.regen_chans();
+	return true;
 }
 
 irc.regen_chans = function()
 {
-	var chans = {}
-	var key, a = []
+	var chans = {};
+	var key, a = [];
 	
 	for (key in irc.chans)
 	  if (irc.chans.hasOwnProperty(key))
@@ -107,32 +107,32 @@ irc.regen_chans = function()
 	for (key = 0; key < a.length; key++)
 	  chans[a[key]] = irc.chans[a[key]];
 	
-	document.getElementById('left_chans_ul').innerHTML = '<li><a onclick="irc.switch_chans(\'console\')"><strong>Console</strong></a></li>'
+	document.getElementById('left_chans_ul').innerHTML = '<li><a onclick="irc.switch_chans(\'console\')"><strong>Console</strong></a></li>';
 	for (var chan in chans)
 		if (chan !== 'console')
-			document.getElementById('left_chans_ul').innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>'
+			document.getElementById('left_chans_ul').innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>';
 	
-	return true
+	return true;
 }
 
 irc.get_name = function(chan)
 {
 	if (chan === undefined)
-		chan = irc.current_chan
-	return irc.chans[chan].divname
+		chan = irc.current_chan;
+	return irc.chans[chan].divname;
 }
 
 irc.make_name = function(chan)
 {
-	name = Math.random().toString(32)
+	name = Math.random().toString(32);
 	for (var channel in irc.chans)
 	{
 		if (channel.divname == name)
 		{
 			name = irc.make_name(chan);
-			break
+			break;
 		}
 	}
-	name = name.replace('.', '') //jQuery hates me
-	return name
+	name = name.replace('.', ''); //jQuery hates me
+	return name;
 }
