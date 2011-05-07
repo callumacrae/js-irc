@@ -39,7 +39,26 @@ irc.socket.on('message', function(data)
 	info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ NICK :(.+)/.exec(data)
 	if (info)
 	{
-		irc.current_nick = info[1];
+		if (irc.current_nick == info[1])
+		{
+			irc.current_nick = info[2];
+		}
+		return;
+	}
+	
+	//note: the below regex is incorrect, I have been unable to find the correct syntax as of yet
+	info = /:[0-9a-zA-Z.-]+ 353 [0-9a-zA-Z\[\]\\`_^{|}]+ [=|@] ([^ ]+) :([%+@~&0-9a-zA-Z\[\]\\`_^{|} ]+)/.exec(data)
+	if (info)
+	{
+		if (!info[1] in irc.chans)
+			return;
+		
+		names = info[2].split(' ');
+		if (names[names.length - 1] === "")
+			names = names.splice(0, names.length - 1)
+		irc.chans[info[1]].names = names;
+		
+		irc.regen_names(info[1]);
 		return;
 	}
 })
@@ -78,6 +97,8 @@ irc.switch_chans = function(chan)
 	}
 	jQuery('#' + irc.get_name() + '_main').hide();
 	jQuery('#' + irc.get_name(chan) + '_main').show();
+	jQuery('#' + irc.get_name() + '_names').hide();
+	jQuery('#' + irc.get_name(chan) + '_names').show();
 	irc.current_chan = chan;
 }
 
@@ -112,6 +133,20 @@ irc.regen_chans = function()
 		if (chan !== 'console')
 			document.getElementById('left_chans_ul').innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>';
 	
+	return true;
+}
+
+irc.regen_names = function(chan)
+{
+	if (!chan in irc.chans || chan == "console")
+		return false;
+
+	names = irc.chans[chan].names;
+	names_div = document.getElementById(irc.get_name(chan) + '_names');
+	
+	names_div.innerHTML = '';
+	for (var i = 0; i < names.length; i++)
+		names_div.innerHTML += '<li>' + names[i] + '</li>';
 	return true;
 }
 
