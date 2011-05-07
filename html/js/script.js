@@ -20,6 +20,13 @@ irc.socket.on('message', function(data)
 		irc.switch_chans(info[2])
 		return;
 	}
+	
+	info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ PART (.+)/.exec(data)
+	if (info)
+	{
+		irc.part_chan(info[2])
+		return;
+	}
 	      
 	info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.+)/.exec(data)
 	if (info)
@@ -62,11 +69,45 @@ irc.switch_chans = function(chan)
 		}
 		document.getElementById('main').innerHTML += '<ul id="' + irc.get_name(chan) + '_main"></ul>'
 		document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan) + '_names"></ul>'
-		document.getElementById('left_chans_ul').innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>'
+		irc.regen_chans()
 	}
 	jQuery('#' + irc.get_name() + '_main').hide()
 	jQuery('#' + irc.get_name(chan) + '_main').show()
 	irc.current_chan = chan
+}
+
+irc.part_chan = function(chan)
+{
+	if (!(chan in irc.chans))
+		return false
+	
+	jQuery('#' + irc.get_name(chan) + '_main').remove()
+	jQuery('#' + irc.get_name(chan) + '_names').remove()
+	delete irc.chans[chan]
+	irc.regen_chans()
+	return true
+}
+
+irc.regen_chans = function()
+{
+	var chans = {}
+	var key, a = []
+	
+	for (key in irc.chans)
+	  if (irc.chans.hasOwnProperty(key))
+	    a.push(key);
+	
+	a.sort();
+	
+	for (key = 0; key < a.length; key++)
+	  chans[a[key]] = irc.chans[a[key]];
+	
+	document.getElementById('left_chans_ul').innerHTML = '<li><a onclick="irc.switch_chans(\'console\')"><strong>Console</strong></a></li>'
+	for (var chan in chans)
+		if (chan !== 'console')
+			document.getElementById('left_chans_ul').innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>'
+	
+	return true
 }
 
 irc.get_name = function(chan)
