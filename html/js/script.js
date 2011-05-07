@@ -46,15 +46,20 @@ irc.socket.on('message', function(data)
 
 irc.socket.on('disconnect', function()
 {
-	document.getElementById(irc.get_name() + '_main').innerHTML += '<li><strong>Error</strong>: Disconnected, please reconnect.</li>'
+	irc.msg_to_all('Error', 'Disconnected, please reconnect.')
 })
 
 irc.send_msg = function(form)
 {
 	irc.socket.send({msg:form.msg.value, chan:irc.current_chan})
-	//document.getElementById(irc.get_name() + '_main').innerHTML += '<li><strong>' + irc.current_nick + '</strong>: ' + form.msg.value + '</li>'
 	form.msg.value = ''
 	return false
+}
+
+irc.msg_to_all = function(nick, msg)
+{
+	for (var chan in irc.chans)
+		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>' + nick + '</strong>: ' + msg + '</li>'
 }
 
 irc.switch_chans = function(chan)
