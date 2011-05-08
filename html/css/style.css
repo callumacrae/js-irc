@@ -216,6 +216,22 @@ div #right_names {
   border-left: 1px black solid;
 }
 
+div#connect {
+  position: relative;
+  top: 100px;
+  height: 130px;
+  width: 300px;
+  background-color: white;
+  border: 1px darkgrey solid;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 50px;
+}
+
+div#connect p {
+  padding: 5px;
+}
+
 
 
 

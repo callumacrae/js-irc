@@ -44,6 +44,13 @@
       </form>
     </footer>
   </div>
+  <div id="connect">
+    <form onSubmit="irc.connect(this); return false">
+      <p><strong>Server:</strong> <input type="text" name="server" /></p>
+      <p><strong>Nick:</strong> <input type="text" name="nick" /></p>
+      <p><input type="submit" value="Connect" /></p>
+    </form>
+  </div>
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
   <script>window.jQuery || document.write("<script src='js/jquery-1.5.1.min.js'>\x3C/script>")</script>
