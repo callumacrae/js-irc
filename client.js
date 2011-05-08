@@ -1,8 +1,6 @@
-var sys = require('sys'),
-	options = require('./config'),
+var options = require('./config'),
 	IRC = require('./lib/lib'),
 	url = require('url'),
-	querystring = require('querystring'),
 	io = require('socket.io'),
 	http = require('http'),  
 	path = require('path'),
@@ -54,6 +52,8 @@ socket.on('connection', function(client)
 			{
 				for (var item in data)
 					options[item] = data[item];
+					
+				//check dns
 				
 				console.log('Connecting to ' + data.server);
 				client.irc = new IRC(options, client);
@@ -94,6 +94,8 @@ socket.on('connection', function(client)
 		}
 		else
 		{
+			if (data.msg.slice(0, 2) != '//')
+				data.msg = data.msg.slice(1, data.msg.length);
 			client.irc.privmsg(data.chan, data.msg);
 		}
 		return true;
