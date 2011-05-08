@@ -4,7 +4,8 @@ var options = require('./config'),
 	io = require('socket.io'),
 	http = require('http'),  
 	path = require('path'),
-	fs = require('fs');
+	fs = require('fs'),
+	dns = require('dns');
 
 server = http.createServer(function (req, res)
 {
@@ -53,13 +54,17 @@ socket.on('connection', function(client)
 				for (var item in data)
 					options[item] = data[item];
 					
-				//check dns
-				
-				console.log('Connecting to ' + data.server);
-				client.irc = new IRC(options, client);
-				client.irc.connect();
-				client.connected = true;
-				return true;
+				return dns.resolve(data.server, 'A', function(err)
+				{
+					if (err)
+						return false;
+					
+					console.log('Connecting to ' + data.server);
+					client.irc = new IRC(options, client);
+					client.irc.connect();
+					client.connected = true;
+					return true;
+				});
 			}
 			return false;
 		}
