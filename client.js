@@ -99,7 +99,7 @@ socket.on('connection', function(client)
 		}
 		else
 		{
-			if (data.msg.slice(0, 2) != '//')
+			if (data.msg.slice(0, 2) == '//')
 				data.msg = data.msg.slice(1, data.msg.length);
 			client.irc.privmsg(data.chan, data.msg);
 		}
