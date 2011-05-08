@@ -18,7 +18,7 @@ irc.connect = function(form)
 	{
 		document.getElementById('console_main').innerHTML += '<li>' + data + '</li>';
 		
-		info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ JOIN :(.+)/.exec(data)
+		info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)!~?[0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ JOIN :(.+)/.exec(data)
 		if (info)
 		{
 			irc.switch_chans(info[2]);
@@ -132,10 +132,11 @@ irc.connect = function(form)
 		for (key = 0; key < a.length; key++)
 		  chans[a[key]] = irc.chans[a[key]];
 		
-		document.getElementById('left_chans_ul').innerHTML = '<li><a onclick="irc.switch_chans(\'console\')"><strong>Console</strong></a></li>';
+		chans_ul = document.getElementById('left_chans_ul');
+		chans_ul.innerHTML = '<li><a onclick="irc.switch_chans(\'console\')"><strong>Console</strong></a></li>';
 		for (var chan in chans)
 			if (chan !== 'console')
-				document.getElementById('left_chans_ul').innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>';
+				chans_ul.innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>';
 		
 		return true;
 	}
