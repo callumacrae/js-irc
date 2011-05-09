@@ -18,7 +18,7 @@ irc.connect = function(form)
 	{
 		document.getElementById('console_main').innerHTML += '<li>' + data + '</li>';
 		
-		info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)!~?[0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ JOIN :(.+)/.exec(data)
+		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ JOIN :(.+)/.exec(data)
 		if (info)
 		{
 			irc.switch_chans(info[2]);
@@ -32,7 +32,15 @@ irc.connect = function(form)
 			return;
 		}
 		
-		//:callumacrae!callumacra@lphp-B86D4C0C.com TOPIC #test :whta
+		info = /:[0-9a-zA-Z.-]+ 353 [0-9a-zA-Z\[\]\\`_^{|}]+ [=|@] ([^ ]+) :(.+)/.exec(data)
+		if (info)
+		{
+			irc.chans[info[1]].topic = info[2];
+			if (info[1] == irc.current_chan)
+				document.getElementsByTagName('header')[0].innerHTML = '<strong>' + info[1] + ':</strong> ' + info[2];
+			return;
+		}
+		
 		info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ TOPIC (.+) :(.+)/.exec(data)
 		if (info)
 		{
