@@ -31,6 +31,16 @@ irc.connect = function(form)
 			irc.part_chan(info[2]);
 			return;
 		}
+		
+		//:callumacrae!callumacra@lphp-B86D4C0C.com TOPIC #test :whta
+		info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ TOPIC (.+) :(.+)/.exec(data)
+		if (info)
+		{
+			irc.chans[info[2]].topic = info[3];
+			if (info[2] == irc.current_chan)
+				document.getElementsByTagName('header')[0].innerHTML = '<strong>' + info[2] + ':</strong> ' + info[3];
+			return;
+		}
 		      
 		info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.+)/.exec(data)
 		if (info)
