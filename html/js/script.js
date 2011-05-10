@@ -25,7 +25,7 @@ irc.connect = function(form)
 			return;
 		}
 		
-		info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)![0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ PART (.+)/.exec(data)
+		info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ PART (.+)/.exec(data)
 		if (info)
 		{
 			irc.part_chan(info[2]);
@@ -41,7 +41,7 @@ irc.connect = function(form)
 			return;
 		}
 		
-		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)![0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ TOPIC (.+) :(.+)/.exec(data)
+		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}]+@[0-9a-zA-Z.-]+ TOPIC (.+) :(.+)/.exec(data)
 		if (info)
 		{
 			irc.chans[info[2]].topic = info[3];
@@ -50,7 +50,7 @@ irc.connect = function(form)
 			return;
 		}
 		      
-		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)![0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.+)/.exec(data)
+		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.+)/.exec(data)
 		if (info)
 		{
 			document.getElementById(irc.get_name(info[2]) + '_main').innerHTML += '<li><strong>' + info[1] + '</strong>: ' + info[3] + '</li>';
@@ -58,7 +58,7 @@ irc.connect = function(form)
 			return;
 		}
 		
-		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)![0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ NICK :(.+)/.exec(data)
+		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ NICK :(.+)/.exec(data)
 		if (info)
 		{
 			if (irc.current_nick == info[1])
