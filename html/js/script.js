@@ -46,6 +46,7 @@ irc.connect = function(form)
 		if (info)
 		{
 			irc.chans[info[2]].topic = info[3];
+			document.getElementById(irc.get_name(info[2]) + '_main').innerHTML += '<li>' + info[1] + ' changed the topic to ' + info[3] + '</li>';
 			if (info[2] == irc.current_chan)
 				document.getElementsByTagName('header')[0].innerHTML = '<strong>' + info[2] + ':</strong> ' + info[3];
 			return;
