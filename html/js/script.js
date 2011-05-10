@@ -13,6 +13,7 @@ irc.connect = function(form)
 	irc.socket = new io.Socket('127.0.0.1', {port:1337});
 	irc.socket.connect();
 	irc.socket.send({server:form.server.value, nick:form.nick.value});
+	irc.current_nick = form.nick.value;
 	jQuery('#connect').remove();
 	irc.socket.on('message', function(data)
 	{
@@ -54,6 +55,14 @@ irc.connect = function(form)
 		if (info)
 		{
 			document.getElementById(irc.get_name(info[2]) + '_main').innerHTML += '<li><strong>' + info[1] + '</strong>: ' + info[3] + '</li>';
+			window.scrollBy(0, 15);
+			return;
+		}
+		      
+		info = /::ZIRCKSELF PRIVMSG (.+) :(.+)/.exec(data)
+		if (info)
+		{
+			document.getElementById(irc.get_name(info[1]) + '_main').innerHTML += '<li><strong>' + irc.current_nick + '</strong>: ' + info[2] + '</li>';
 			window.scrollBy(0, 15);
 			return;
 		}
