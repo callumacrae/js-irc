@@ -7,6 +7,7 @@ irc.chans = {
 	}
 }
 irc.current_chan = 'console';
+irc.hooks = {};
 
 irc.connect = function(form)
 {
@@ -29,7 +30,12 @@ irc.connect = function(form)
 		info = /:([0-9a-zA-Z\[\]\\`_^{|}]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ PART (.+)/.exec(data)
 		if (info)
 		{
-			irc.part_chan(info[2]);
+			if (chan in irc.chans)
+			{
+				irc.call_hook('chan_part', chan);
+				delete irc.chans[chan];
+				irc.regen_chans();
+			};
 			return;
 		}
 		
@@ -38,7 +44,10 @@ irc.connect = function(form)
 		{
 			irc.chans[info[1]].topic = info[2];
 			if (info[1] == irc.current_chan)
-				document.getElementsByTagName('header')[0].innerHTML = '<strong>' + info[1] + ':</strong> ' + info[2];
+				irc.call_hook('global_chan', {
+					chan: info[1],
+					topic: info[1]
+				});
 			return;
 		}
 		
@@ -46,25 +55,40 @@ irc.connect = function(form)
 		if (info)
 		{
 			irc.chans[info[2]].topic = info[3];
-			document.getElementById(irc.get_name(info[2]) + '_main').innerHTML += '<li>' + info[1] + ' changed the topic to ' + info[3] + '</li>';
+			irc.call_hook('chan_topic', {
+				chan: irc.get_name(info[2]) + '_main',
+				nick: info[1],
+				topic: info[3]
+			});
+			
 			if (info[2] == irc.current_chan)
-				document.getElementsByTagName('header')[0].innerHTML = '<strong>' + info[2] + ':</strong> ' + info[3];
+				irc.call_hook('global_chan', {
+					chan: info[2],
+					topic: info[3]
+				});
+			
 			return;
 		}
 		      
 		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.+)/.exec(data)
 		if (info)
 		{
-			document.getElementById(irc.get_name(info[2]) + '_main').innerHTML += '<li><strong>' + info[1] + '</strong>: ' + info[3] + '</li>';
-			window.scrollBy(0, 15);
+			irc.call_hook('chan_msg', {
+				chan: irc.get_name(info[2]) + '_main',
+				nick: info[1],
+				msg: info[3]
+			});
 			return;
 		}
 		      
 		info = /::ZIRCKSELF PRIVMSG (.+) :(.+)/.exec(data)
 		if (info)
 		{
-			document.getElementById(irc.get_name(info[1]) + '_main').innerHTML += '<li><strong>' + irc.current_nick + '</strong>: ' + info[2] + '</li>';
-			window.scrollBy(0, 15);
+			irc.call_hook('chan_msg', {
+				chan: irc.get_name(info[1]) + '_main',
+				nick: irc.current_nick,
+				msg: info[2]
+			});
 			return;
 		}
 		
@@ -97,7 +121,7 @@ irc.connect = function(form)
 	
 	irc.socket.on('disconnect', function()
 	{
-		irc.msg_to_all('Error', 'Disconnected, please reconnect.');
+		irc.call_hook('global_error', 'Disconnected, please reconnect.');
 	})
 	
 	irc.send_msg = function(form)
@@ -107,44 +131,25 @@ irc.connect = function(form)
 		return false;
 	}
 	
-	irc.msg_to_all = function(nick, msg)
+	irc.join_chan = function(chan)
 	{
-		for (var chan in irc.chans)
-			document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>' + nick + '</strong>: ' + msg + '</li>';
+		irc.socket.send({msg:'/join ' + chan, chan:irc.current_chan});
 	}
 	
 	irc.switch_chans = function(chan)
 	{
 		if (!(chan in irc.chans))
 		{
-			irc.socket.send({msg:'/join ' + chan, chan:irc.current_chan});
 			irc.chans[chan] = {
 				divname: irc.make_name(chan),
 				names: [],
 				topic: ''
-			}
-			document.getElementById('main').innerHTML += '<ul id="' + irc.get_name(chan) + '_main"></ul>';
-			document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan) + '_names"></ul>';
+			};
+			irc.call_hook('chan_join', chan);
 			irc.regen_chans();
 		}
-		document.getElementsByTagName('header')[0].innerHTML = '<strong>' + chan + ':</strong> ' + irc.chans[chan].topic;
-		jQuery('#' + irc.get_name() + '_main').hide();
-		jQuery('#' + irc.get_name(chan) + '_main').show();
-		jQuery('#' + irc.get_name() + '_names').hide();
-		jQuery('#' + irc.get_name(chan) + '_names').show();
+		irc.call_hook('chan_switch', chan);
 		irc.current_chan = chan;
-	}
-	
-	irc.part_chan = function(chan)
-	{
-		if (!(chan in irc.chans))
-			return false;
-		
-		jQuery('#' + irc.get_name(chan) + '_main').remove();
-		jQuery('#' + irc.get_name(chan) + '_names').remove();
-		delete irc.chans[chan];
-		irc.regen_chans();
-		return true;
 	}
 	
 	irc.regen_chans = function()
@@ -205,4 +210,24 @@ irc.connect = function(form)
 		name = name.replace('.', ''); //jQuery hates me
 		return name;
 	}
+}
+	
+irc.add_hook = function(name, callback)
+{
+	if (typeof callback != 'function')
+		return false;
+	
+	if (irc.hooks[name] === undefined)
+		irc.hooks[name] = [];
+
+	irc.hooks[name].push(callback);
+	return true
+}
+
+irc.call_hook = function(name, data)
+{
+	var hooks = irc.hooks[name];
+	for (var i = 0; i < hooks.length; i++)
+		hooks[i](data);
+	return true;
 }
