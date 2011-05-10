@@ -117,6 +117,7 @@ irc.connect = function(form)
 			document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan) + '_names"></ul>';
 			irc.regen_chans();
 		}
+		document.getElementsByTagName('header')[0].innerHTML = '<strong>' + chan + ':</strong> ' + irc.chans[chan].topic;
 		jQuery('#' + irc.get_name() + '_main').hide();
 		jQuery('#' + irc.get_name(chan) + '_main').show();
 		jQuery('#' + irc.get_name() + '_names').hide();
