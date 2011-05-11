@@ -39,14 +39,14 @@ irc.connect = function(form)
 			return;
 		}
 		
-		info = /:[0-9a-zA-Z.-]+ 332 [0-9a-zA-Z\[\]\\`_^{|}\-]+ [=|@] ([^ ]+) :(.+)/.exec(data)
+		info = /:[0-9a-zA-Z.-]+ 332 [0-9a-zA-Z\[\]\\`_^{|}\-]+ [= |@ ]?([^ ]+) :(.+)/.exec(data)
 		if (info)
 		{
 			irc.chans[info[1]].topic = info[2];
 			if (info[1] == irc.current_chan)
 				irc.call_hook('global_chan', {
 					chan: info[1],
-					topic: info[1]
+					topic: info[2]
 				});
 			return;
 		}
