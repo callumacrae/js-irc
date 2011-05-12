@@ -70,6 +70,18 @@ irc.connect = function(form)
 			return;
 		}
 		      
+		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.*callum-test.*)/.exec(data);
+		if (info)
+		{
+			alert('test')
+			irc.call_hook('chan_msg_hl', {
+				chan: irc.get_name(info[2]) + '_main',
+				nick: info[1],
+				msg: info[3]
+			});
+			return;
+		}
+		      
 		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.+)/.exec(data)
 		if (info)
 		{

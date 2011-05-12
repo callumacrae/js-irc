@@ -4,6 +4,13 @@ irc.add_hook('chan_msg', function(data)
 	window.scrollBy(0, 15);
 });
 
+irc.add_hook('chan_msg_hl', function(data)
+{
+	alert(data.msg)
+	document.getElementById(data.chan).innerHTML += '<li><strong>' + data.nick + '</strong>: ' + data.msg + '</li>';
+	window.scrollBy(0, 15);
+});
+
 irc.add_hook('chan_topic', function(data)
 {
 	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' changed the topic to ' + data.topic + '</li>';
