@@ -69,7 +69,7 @@ socket.on('connection', function(client)
 			return false;
 		}
 		
-		if (data.msg == undefined || data.chan == undefined)
+		if (data.msg == undefined || data.chan == undefined || data.msg == null)
 		{
 			return false;
 		}

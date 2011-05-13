@@ -137,6 +137,8 @@ irc.connect = function(form)
 	
 	irc.send_msg = function(form)
 	{
+		if (form.msg.value == '')
+			return false;
 		irc.socket.send({msg:form.msg.value, chan:irc.current_chan});
 		form.msg.value = '';
 		return false;
