@@ -6,8 +6,7 @@ irc.add_hook('chan_msg', function(data)
 
 irc.add_hook('chan_msg_hl', function(data)
 {
-	alert(data.msg)
-	document.getElementById(data.chan).innerHTML += '<li><strong>' + data.nick + '</strong>: ' + data.msg + '</li>';
+	document.getElementById(data.chan).innerHTML += '<li class="highlight"><strong>' + data.nick + '</strong>: ' + data.msg + '</li>';
 	window.scrollBy(0, 15);
 });
 
@@ -58,7 +57,7 @@ irc.add_hook('global_error', function(msg)
 
 /*
  chan_msg
- *chan_msg_hl
+ chan_msg_hl
  *chan_notice
  *chan_nick
  chan_topic

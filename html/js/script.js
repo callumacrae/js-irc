@@ -70,10 +70,9 @@ irc.connect = function(form)
 			return;
 		}
 		      
-		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.*callum-test.*)/.exec(data);
+		info = new RegExp(':([0-9a-zA-Z\\[\\]\\\\`_^{|}\\-]+)!~?[0-9a-zA-Z\\[\\]\\\\`_^{|}\\-]+@[0-9a-zA-Z.-]+ PRIVMSG (.+) :(.*' + irc.current_nick + '.*)').exec(data);
 		if (info)
 		{
-			alert('test')
 			irc.call_hook('chan_msg_hl', {
 				chan: irc.get_name(info[2]) + '_main',
 				nick: info[1],

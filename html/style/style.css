@@ -232,7 +232,9 @@ div#connect p {
   padding: 5px;
 }
 
-
+#main ul li.highlight {
+  background-color: yellow;
+}
 
 
 
