@@ -10,6 +10,36 @@ irc.add_hook('chan_msg_hl', function(data)
 	window.scrollBy(0, 15);
 });
 
+irc.add_hook('chan_action', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li class="action"><strong>' + data.nick + ' ' + data.msg + '</strong></li>';
+	window.scrollBy(0, 15);
+});
+
+irc.add_hook('chan_action_hl', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li class="action highlight"><strong>' + data.nick + ' ' + data.msg + '</strong></li>';
+	window.scrollBy(0, 15);
+});
+
+irc.add_hook('chan_notice', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li><strong>-' + data.nick + '-</strong> ' + data.msg + '</li>';
+	window.scrollBy(0, 15);
+});
+
+irc.add_hook('chan_usr_part', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' has left the channel. (' + data.msg + ')</li>';
+	window.scrollBy(0, 15);
+});
+
+irc.add_hook('chan_usr_join', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' has entered the channel.</li>';
+	window.scrollBy(0, 15);
+});
+
 irc.add_hook('chan_topic', function(data)
 {
 	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' changed the topic to ' + data.topic + '</li>';
@@ -54,15 +84,16 @@ irc.add_hook('global_error', function(msg)
 		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>Error:</strong>: ' + msg + '</li>';
 });
 
-
 /*
  chan_msg
  chan_msg_hl
- *chan_notice
+ chan_notice
+ chan_action
+ chan_action_hl
  *chan_nick
  chan_topic
- *chan_usr_join
- *chan_usr_part
+ chan_usr_join
+ chan_usr_part
  *chan_join
  chan_part
  chan_switch
