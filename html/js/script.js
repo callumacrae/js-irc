@@ -257,11 +257,51 @@ irc.connect = function(form)
 	{
 		if (!chan in irc.chans || chan == "console")
 			return false;
-	
+
 		names = irc.chans[chan].names;
 		names_div = document.getElementById(irc.get_name(chan) + '_names');
-		
 		names_div.innerHTML = '';
+		
+		function get_num(c)
+		{
+			switch (c)
+			{
+				case "~":
+					return 5;
+				    
+				case "&":
+					return 4;
+				    
+				case "@":
+					return 3;
+				    
+				case "%":
+					return 2;
+				    
+				case "+":
+					return 1;
+				    
+				default:
+					return 0;
+			}
+		}
+		
+		names = names.sort(function(a, b)
+		{
+			var a_num = get_num(a.slice(0, 1));
+			var b_num = get_num(b.slice(0, 1));
+			if (a_num != b_num)
+				return b_num - a_num;
+			
+			if (a_num !== 0 && b_num !== 0)
+			{
+				a = a.slice(1);
+				b = b.slice(1);
+			}
+			
+			return (a.toLowerCase() < b.toLowerCase()) ? -1 : 1;
+		});
+		
 		for (var i = 0; i < names.length; i++)
 			names_div.innerHTML += '<li>' + names[i] + '</li>';
 		return true;
@@ -271,7 +311,7 @@ irc.connect = function(form)
 	{
 		if (chan === undefined)
 			chan = irc.current_chan;
-		return irc.chans[chan].divname;
+		return irc.chans[chan.toLowerCase()].divname;
 	}
 	
 	irc.make_name = function(chan)
@@ -304,6 +344,8 @@ irc.add_hook = function(name, callback)
 
 irc.call_hook = function(name, data)
 {
+	if (!name in irc.hooks)
+		return false;
 	var hooks = irc.hooks[name];
 	for (var i = 0; i < hooks.length; i++)
 		hooks[i](data);
