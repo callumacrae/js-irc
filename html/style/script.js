@@ -75,13 +75,13 @@ irc.add_hook('chan_switch', function(chan)
 irc.add_hook('global_notice', function(msg)
 {
 	for (var chan in irc.chans)
-		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>Notice:</strong>: ' + msg + '</li>';
+		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>Notice:</strong> ' + msg + '</li>';
 });
 
 irc.add_hook('global_error', function(msg)
 {
 	for (var chan in irc.chans)
-		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>Error:</strong>: ' + msg + '</li>';
+		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>Error:</strong> ' + msg + '</li>';
 });
 
 /*
