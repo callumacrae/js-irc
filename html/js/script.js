@@ -146,6 +146,17 @@ irc.connect = function(form)
 			return;
 		}
 		      
+		info = /::ZIRCKSELF PRIVMSG (.+) :\x01ACTION (.+)\x01/.exec(data)
+		if (info)
+		{
+			irc.call_hook('chan_action', {
+				chan: irc.get_name(info[1]) + '_main',
+				nick: irc.current_nick,
+				msg: info[2]
+			});
+			return;
+		}
+		      
 		info = /::ZIRCKSELF PRIVMSG (.+) :(.+)/.exec(data)
 		if (info)
 		{

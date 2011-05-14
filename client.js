@@ -92,6 +92,10 @@ socket.on('connection', function(client)
 					client.irc.quit('https://github.com/callumacrae/irc-js/');
 					break;
 				
+				case "me":
+					client.irc.raw('PRIVMSG ' + data.chan + ' :\u0001ACTION ' + rest_of + '\u0001');
+					break;
+				
 				default:
 					client.irc.raw(command.toUpperCase() + ' ' + rest_of);
 					break;
