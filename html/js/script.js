@@ -293,7 +293,7 @@ irc.connect = function(form)
 			if (a_num != b_num)
 				return b_num - a_num;
 			
-			if (a_num !== 0 && b_num !== 0)
+			if (a_num !== 0)
 			{
 				a = a.slice(1);
 				b = b.slice(1);
