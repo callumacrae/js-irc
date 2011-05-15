@@ -328,6 +328,77 @@ irc.connect = function(form)
 		name = name.replace('.', ''); //jQuery hates me
 		return name;
 	}
+	
+	$(document).keydown(function(event)
+	{
+		var kill = true;
+		switch(event.keyCode)
+		{
+			case 9: //tab
+				
+				ctrl = document.getElementById('msginput');
+				var position = 0;
+				if (document.selection)
+				{
+					ctrl.focus();
+					var selection = document.selection.createRange();
+					selection.moveStart('character', -ctrl.value.length);
+					position = selection.text.length;
+				}
+				else if (ctrl.selectionStart || ctrl.selectionStart == '0')
+					position = ctrl.selectionStart;
+				
+				var start_pos = ctrl.value.lastIndexOf(' ', position) + 1;
+				var text = ctrl.value.slice(start_pos, position);
+				
+				//FUUUUUU UGLY CODE!
+				var text_final = null;
+				if (text.slice(0, 1) == '#')
+				{
+					for (var text_once in irc.chans)
+						if (text == text_once.slice(0, text.length))
+							text_final = text_once;
+				}
+				else
+				{
+					var names = irc.chans[irc.current_chan].names;
+					for (i = 0; i < names.length; i++)
+					{
+						var spec = /^[~&@%+]/.test(names[i]);
+						if (text == names[i].slice(spec ? 1 : 0, text.length + (spec ? 1 : 0)))
+							text_final = spec ? names[i].slice(1) : names[i];
+					}
+				}
+				
+				if (start_pos)
+					var final_text = ctrl.value.slice(0, start_pos) + text_final + ' ' + ctrl.value.slice(position);
+				else if (text.slice(0, 1) != '#')
+					var final_text = text_final + ': ' + ctrl.value.slice(position);
+				else
+					var final_text = text_final + ' ' + ctrl.value.slice(position);
+				
+				ctrl.value = final_text;
+				
+				break;
+			
+			case 191: //forward stroke ("/")
+				var input = $('#msginput');
+				if (!input.is(':focus'))
+				{
+					input.focus();
+					if (input.text() !== null)
+						input.text('/');
+				}
+				else
+					kill = false;
+				
+			default:
+				kill = false;
+		}
+		
+		if (kill)
+			event.preventDefault();
+	});
 }
 	
 irc.add_hook = function(name, callback)
@@ -344,9 +415,9 @@ irc.add_hook = function(name, callback)
 
 irc.call_hook = function(name, data)
 {
-	if (!name in irc.hooks)
-		return false;
 	var hooks = irc.hooks[name];
+	if (hooks === undefined)
+		return false;
 	for (var i = 0; i < hooks.length; i++)
 		hooks[i](data);
 	return true;
