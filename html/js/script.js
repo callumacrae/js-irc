@@ -205,7 +205,23 @@ irc.connect = function(form)
 	{
 		if (form.msg.value == '')
 			return false;
-		irc.socket.send({msg:form.msg.value, chan:irc.current_chan});
+		
+		var cancel_send = false;
+		if (form.msg.slice(0, 1) == '/' && form.msg.slice(0, 2) != '//')
+		{
+			var command = form.msg.slice(1, form.msg.indexOf(' '));
+			var rest_of = form.msg.slice(form.msg.indexOf(' ') + 1, form.msg.length);
+			switch (command)
+			{
+				case "about":
+					irc.call_hook('about');
+					cancel_send = true;
+					break;
+			}
+		}
+		
+		if (!cancel_send)
+			irc.socket.send({msg:form.msg.value, chan:irc.current_chan});
 		form.msg.value = '';
 		return false;
 	}
