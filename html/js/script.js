@@ -210,7 +210,7 @@ irc.connect = function(form)
 		if (form.msg.slice(0, 1) == '/' && form.msg.slice(0, 2) != '//')
 		{
 			var command = form.msg.slice(1, form.msg.indexOf(' '));
-			var rest_of = form.msg.slice(form.msg.indexOf(' ') + 1, form.msg.length);
+			var rest_of = form.msg.slice(form.msg.indexOf(' ') + 1);
 			switch (command)
 			{
 				case "about":
