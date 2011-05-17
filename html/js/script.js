@@ -8,6 +8,10 @@ irc.chans = {
 };
 irc.current_chan = 'console';
 irc.hooks = {};
+irc.prev_msgs = {
+	msgs: [],
+	current: 0
+};
 
 irc.connect = function(form)
 {
@@ -231,6 +235,8 @@ irc.connect = function(form)
 		{
 			return false;
 		}
+		
+		irc.prev_msgs.msgs.push(form.msg.value);
 		
 		var cancel_send = false;
 		if (form.msg.value.slice(0, 1) === '/' && form.msg.value.slice(0, 2) !== '//')
@@ -481,8 +487,56 @@ irc.connect = function(form)
 					kill = false;
 				}
 				break;
+			
+			case 38: //up key
+				if (!$('#msginput').is(':focus'))
+				{
+					kill = false;
+					break;
+				}
+				
+				var input = document.getElementById('msginput'),
+					msgs = irc.prev_msgs.msgs,
+					new_msg = msgs[msgs.length - irc.prev_msgs.current - 1];
+				
+				if (new_msg !== undefined)
+				{
+					input.value = new_msg;
+					irc.prev_msgs.current++;
+				}
+				
+				break;
+			
+			case 40: //down key
+				if (!$('#msginput').is(':focus'))
+				{
+					kill = false;
+					break;
+				}
+				
+				var input = document.getElementById('msginput'),
+					msgs = irc.prev_msgs.msgs,
+					new_msg = msgs[msgs.length - irc.prev_msgs.current + 1];
+				
+				if (new_msg !== undefined)
+				{
+					input.value = new_msg;
+					irc.prev_msgs.current--;
+				}
+				else
+				{
+					input.value = '';
+					irc.prev_msgs.current = 0;
+				}
+				
+				break;
+				
 				
 			default:
+				if ($('#msginput').is(':focus') && irc.prev_msgs.current !== 0)
+				{
+					irc.prev_msgs.current = 0;
+				}
 				kill = false;
 		}
 		
