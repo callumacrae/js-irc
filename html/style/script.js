@@ -90,7 +90,7 @@ irc.add_hook('global_error', function(msg)
 		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>Error:</strong> ' + msg + '</li>';
 });
 
-irc.add_hook('about', function(msg)
+irc.add_hook('about', function()
 {
 	alert('This IRC client was built by Callum Macrae.')
 });

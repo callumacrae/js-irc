@@ -235,7 +235,8 @@ irc.connect = function(form)
 		var cancel_send = false;
 		if (form.msg.value.slice(0, 1) === '/' && form.msg.value.slice(0, 2) !== '//')
 		{
-			var command = form.msg.value.slice(1, form.msg.value.indexOf(' '));
+			var end = form.msg.value.indexOf(' ') === -1 ? form.msg.value.length : form.msg.value.indexOf(' ');
+			var command = form.msg.value.slice(1, end);
 			var rest_of = form.msg.value.slice(form.msg.value.indexOf(' ') + 1);
 			switch (command)
 			{
