@@ -466,13 +466,14 @@ irc.connect = function(form)
 				break;
 			
 			case 191: //forward stroke ("/")
-				var input = $('#msginput');
-				if (!input.is(':focus'))
+				var jinput = $('#msginput'),
+					input = document.getElementById('msginput');
+				if (!jinput.is(':focus'))
 				{
-					input.focus();
-					if (input.text() !== null)
+					jinput.focus();
+					if (input.value === '')
 					{
-						input.text('/');
+						input.value = '/';
 					}
 				}
 				else
