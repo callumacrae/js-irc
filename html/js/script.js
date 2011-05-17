@@ -17,11 +17,22 @@ irc.runs = 0;
 
 function html_clean(string)
 {
-	return string.replace(/&/g, '&amp;')
+	string = string.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;')
 		.replace(/'/g, '&#039;');
+	
+	var regex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+	string = string.replace(regex, '<a href="$1" target="_blank">$1</a>');
+	
+	regex = /(^|[^\/])(www\.[\S]+(\b|$))/ig;
+	string = string.replace(regex, '$1<a href="http://$2" target="_blank">$2</a>');
+	
+	regex = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/ig;
+	string = string.replace(regex, '<a href="mailto:$1">$1</a>');
+	
+	return string;
 }
 
 irc.connect = function(form)
