@@ -174,9 +174,27 @@ irc.connect = function(form)
 		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ NICK :(.+)/.exec(data);
 		if (info)
 		{
+			var chan, names;
+			
 			if (irc.current_nick === info[1])
 			{
 				irc.current_nick = info[2];
+			}
+			
+			for (chan in irc.chans)
+			{
+				names = irc.chans[chan].names;
+				if (names.indexOf(info[1]) !== -1)
+				{
+					irc.call_hook('chan_nick', {
+						chan: irc.get_name(chan) + '_main',
+						old_nick: info[1],
+						new_nick: info[2]
+					});
+					
+					names.splice(names.indexOf(info[1]), 1, info[2]);
+					irc.regen_names(chan);
+				}
 			}
 			return;
 		}

@@ -46,6 +46,12 @@ irc.add_hook('chan_topic', function(data)
 	window.scrollBy(0, 15);
 });
 
+irc.add_hook('chan_nick', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li>' + data.old_nick + ' is now known as ' + data.new_nick + '</li>';
+	window.scrollBy(0, 15);
+});
+
 irc.add_hook('global_topic', function(data)
 {
 	document.getElementsByTagName('header')[0].innerHTML = '<strong>' + data.chan + ':</strong> ' + data.topic;
@@ -95,7 +101,7 @@ irc.add_hook('about', function(msg)
  chan_notice
  chan_action
  chan_action_hl
- *chan_nick
+ chan_nick
  chan_topic
  chan_usr_join
  chan_usr_part
