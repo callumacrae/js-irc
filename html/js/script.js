@@ -32,6 +32,9 @@ function html_clean(string)
 	regex = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/ig;
 	string = string.replace(regex, '<a href="mailto:$1">$1</a>');
 	
+	regex = /(#[^ ]+)/ig;
+	string = string.replace(regex, '<a href="javascript:irc.switch_chans(\'$1\')">$1</a>');
+	
 	return string;
 }
 
@@ -313,6 +316,7 @@ irc.connect = function(form)
 	{
 		if (irc.chans[chan] === undefined)
 		{
+			irc.join_chan(chan);
 			irc.chans[chan] = {
 				divname: irc.make_name(chan),
 				names: [],
