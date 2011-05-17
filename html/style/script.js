@@ -90,6 +90,12 @@ irc.add_hook('global_error', function(msg)
 		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>Error:</strong> ' + msg + '</li>';
 });
 
+irc.add_hook('quit', function(msg)
+{
+	for (var chan in irc.chans)
+		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>You have quit</strong> (' + msg + ')</li>';
+});
+
 irc.add_hook('about', function()
 {
 	alert('This IRC client was built by Callum Macrae.')

@@ -6,6 +6,7 @@ irc.chans = {
 		topic: 'Welcome to Node.IRC!'
 	}
 };
+irc.connected = false;
 irc.current_chan = 'console';
 irc.hooks = {};
 irc.prev_msgs = {
@@ -20,6 +21,7 @@ irc.connect = function(form)
 	irc.socket.send({server:form.server.value, nick:form.nick.value});
 	irc.current_nick = form.nick.value;
 	jQuery('#connect').remove();
+	irc.connected = true;
 	irc.socket.on('message', function(data)
 	{
 		document.getElementById('console_main').innerHTML += '<li>' + data + '</li>';
@@ -177,6 +179,15 @@ irc.connect = function(form)
 			});
 			return;
 		}
+		      
+		info = /::ZIRCKSELF QUIT :(.+)/.exec(data);
+		if (info)
+		{
+			irc.call_hook('quit', info[1]);
+			irc.connected = false;
+			irc.socket.disconnect();
+			return;
+		}
 		
 		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ NICK :(.+)/.exec(data);
 		if (info)
@@ -229,7 +240,10 @@ irc.connect = function(form)
 	
 	irc.socket.on('disconnect', function()
 	{
-		irc.call_hook('global_error', 'Disconnected, please reconnect.');
+		if (irc.connected)
+		{
+			irc.call_hook('global_error', 'Disconnected, please reconnect.');
+		}
 	});
 	
 	irc.send_msg = function(form)
@@ -387,7 +401,6 @@ irc.connect = function(form)
 	
 	irc.get_name = function(chan)
 	{
-		console.log(chan);
 		if (chan === undefined)
 		{
 			chan = irc.current_chan;
