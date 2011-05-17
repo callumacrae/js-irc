@@ -93,7 +93,7 @@ irc.connect = function(form)
 			irc.chans[info[1]].topic = info[2];
 			if (info[1] === irc.current_chan)
 			{
-				irc.call_hook('global_chan', {
+				irc.call_hook('global_topic', {
 					chan: info[1],
 					topic: info[2]
 				});
