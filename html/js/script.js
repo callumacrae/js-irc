@@ -44,7 +44,7 @@ irc.connect = function(form)
 			return;
 		}
 		
-		info = /:([0-9a-zA-Z\[\]\\`_\^{|}]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ PART (.+) :(.+)/.exec(data);
+		info = /:([0-9a-zA-Z\[\]\\`_\^{|}]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ PART ([^:]+) :(.+)/.exec(data);
 		if (info)
 		{
 			if (info[1] === irc.current_nick)
@@ -99,7 +99,7 @@ irc.connect = function(form)
 			return;
 		}
 		
-		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}]+@[0-9a-zA-Z.\-\/]+ TOPIC (.+) :(.+)/.exec(data);
+		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}]+@[0-9a-zA-Z.\-\/]+ TOPIC ([^:]+) :(.+)/.exec(data);
 		if (info)
 		{
 			irc.chans[info[2]].topic = info[3];
@@ -120,7 +120,7 @@ irc.connect = function(form)
 			return;
 		}
 		      
-		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG (.+) :\x01ACTION (.+)\x01/.exec(data);
+		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG ([^:]+) :\x01ACTION (.+)\x01/.exec(data);
 		if (info)
 		{
 			irc.call_hook(info[3].search(irc.current_nick) !== -1 ? 'chan_action_hl' : 'chan_action', {
@@ -131,7 +131,7 @@ irc.connect = function(form)
 			return;
 		}
 		      
-		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG (.+) :(.+)/.exec(data);
+		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG ([^:]+) :(.+)/.exec(data);
 		if (info)
 		{
 			irc.call_hook(info[3].search(irc.current_nick) !== -1 ? 'chan_msg_hl' : 'chan_msg', {
@@ -142,7 +142,7 @@ irc.connect = function(form)
 			return;
 		}
 		
-		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ NOTICE (.+) :(.+)/.exec(data);
+		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ NOTICE ([^:]+) :(.+)/.exec(data);
 		if (info)
 		{
 			irc.call_hook('chan_notice', {
@@ -153,7 +153,7 @@ irc.connect = function(form)
 			return;
 		}
 		      
-		info = /::ZIRCKSELF PRIVMSG (.+) :\x01ACTION (.+)\x01/.exec(data);
+		info = /::ZIRCKSELF PRIVMSG ([^:]+) :\x01ACTION (.+)\x01/.exec(data);
 		if (info)
 		{
 			irc.call_hook('chan_action', {
@@ -164,7 +164,7 @@ irc.connect = function(form)
 			return;
 		}
 		      
-		info = /::ZIRCKSELF PRIVMSG (.+) :(.+)/.exec(data);
+		info = /::ZIRCKSELF PRIVMSG ([^:]+) :(.+)/.exec(data);
 		if (info)
 		{
 			irc.call_hook('chan_msg', {
