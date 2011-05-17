@@ -44,10 +44,10 @@ server.listen(1337, "127.0.0.1");
 var socket = io.listen(server);
 socket.on('connection', function(client)
 {
-	client.connected = false;
+	client.irc_connected = false;
 	client.on('message', function(data)
 	{
-		if (!client.connected)
+		if (!client.irc_connected)
 		{
 			if (data.server !== undefined && data.nick !== undefined)
 			{
@@ -66,7 +66,7 @@ socket.on('connection', function(client)
 					{
 						console.log(data);
 					});
-					client.connected = true;
+					client.irc_connected = true;
 					return true;
 				});
 			}
@@ -129,7 +129,7 @@ socket.on('connection', function(client)
 
 	client.on('disconnect', function()
 	{
-		if (client.connected)
+		if (client.irc_connected)
 			client.irc.quit('https://github.com/callumacrae/irc-js/');
 	});
 });
