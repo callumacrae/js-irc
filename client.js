@@ -76,8 +76,9 @@ socket.on('connection', function(client)
 	
 		if (data.msg.slice(0, 1) == '/' && data.msg.slice(0, 2) != '//')
 		{
-			var command = data.msg.slice(1, data.msg.indexOf(' '));
-			var rest_of = data.msg.slice(data.msg.indexOf(' ') + 1);
+			var index_of = data.msg.indexOf(' ') === -1 ? data.msg.length : data.msg.indexOf(' ');
+			var command = data.msg.slice(1, index_of);
+			var rest_of = data.msg.slice(index_of + 1);
 			switch (command)
 			{
 				case "msg":
