@@ -14,6 +14,15 @@ irc.prev_msgs = {
 	current: 0
 };
 
+function html_clean(string)
+{
+	return string.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#039;');
+}
+
 irc.connect = function(form)
 {
 	irc.socket = new io.Socket('127.0.0.1', {port:1337});

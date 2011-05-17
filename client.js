@@ -101,6 +101,14 @@ socket.on('connection', function(client)
 					client.irc.raw('PRIVMSG ' + data.chan + ' :\u0001ACTION ' + rest_of + '\u0001');
 					break;
 				
+				case "ns":
+					client.irc.raw('PRIVMSG NickServ ' + rest_of);
+					break;
+				
+				case "cs":
+					client.irc.raw('PRIVMSG ChanServ ' + rest_of);
+					break;
+				
 				case "slap":
 					client.irc.raw('PRIVMSG ' + data.chan + ' :\u0001ACTION slaps ' + rest_of + ' around a bit with a large trout.\u0001');
 					break;
