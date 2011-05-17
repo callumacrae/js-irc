@@ -62,6 +62,10 @@ socket.on('connection', function(client)
 					console.log('Connecting to ' + data.server);
 					client.irc = new IRC(options, client);
 					client.irc.connect();
+					client.irc.on('error', function(data)
+					{
+						console.log(data);
+					});
 					client.connected = true;
 					return true;
 				});
