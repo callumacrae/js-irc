@@ -58,8 +58,6 @@ irc.connect = function(form)
 					msg: info[3]
 				});
 				
-				//delete [irc.chans[info[2]].names.indexOf(info[1])];
-				
 				var names = irc.chans[info[2]].names;
 				var index = false;
 				for (var i = 0; i < names.length; i++)
@@ -111,32 +109,10 @@ irc.connect = function(form)
 			return;
 		}
 		      
-		info = new RegExp(':([0-9a-zA-Z\\[\\]\\\\`_^{|}\\-]+)!~?[0-9a-zA-Z\\[\\]\\\\`_^{|}\\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG (.+) :\x01ACTION (.*' + irc.current_nick + '.*)\x01').exec(data);
-		if (info)
-		{
-			irc.call_hook('chan_action_hl', {
-				chan: irc.get_name(info[2]) + '_main',
-				nick: info[1],
-				msg: info[3]
-			});
-			return;
-		}
-		      
 		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG (.+) :\x01ACTION (.+)\x01/.exec(data)
 		if (info)
 		{
-			irc.call_hook('chan_action', {
-				chan: irc.get_name(info[2]) + '_main',
-				nick: info[1],
-				msg: info[3]
-			});
-			return;
-		}
-		      
-		info = new RegExp(':([0-9a-zA-Z\\[\\]\\\\`_^{|}\\-]+)!~?[0-9a-zA-Z\\[\\]\\\\`_^{|}\\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG (.+) :(.*' + irc.current_nick + '.*)').exec(data);
-		if (info)
-		{
-			irc.call_hook('chan_msg_hl', {
+			irc.call_hook(info[3].search(irc.current_nick) !== -1 ? 'chan_action_hl' : 'chan_action', {
 				chan: irc.get_name(info[2]) + '_main',
 				nick: info[1],
 				msg: info[3]
@@ -147,7 +123,8 @@ irc.connect = function(form)
 		info = /:([0-9a-zA-Z\[\]\\`_^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_^{|}\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG (.+) :(.+)/.exec(data)
 		if (info)
 		{
-			irc.call_hook('chan_msg', {
+			console.log(info[3].search(irc.current_nick));
+			irc.call_hook(info[3].search(irc.current_nick) !== -1 ? 'chan_msg_hl' : 'chan_msg', {
 				chan: irc.get_name(info[2]) + '_main',
 				nick: info[1],
 				msg: info[3]
