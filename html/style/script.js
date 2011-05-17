@@ -24,7 +24,7 @@ irc.add_hook('chan_action_hl', function(data)
 
 irc.add_hook('chan_notice', function(data)
 {
-	document.getElementById(data.chan).innerHTML += '<li><strong>-' + data.nick + '-</strong> ' + data.msg + '</li>';
+	document.getElementById(data.chan).innerHTML += '<li class="notice"><strong>-' + data.nick + '-</strong> ' + data.msg + '</li>';
 	window.scrollBy(0, 15);
 });
 

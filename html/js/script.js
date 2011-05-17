@@ -145,11 +145,14 @@ irc.connect = function(form)
 		info = /:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ NOTICE ([^:]+) :(.+)/.exec(data);
 		if (info)
 		{
-			irc.call_hook('chan_notice', {
-				chan: irc.get_name(info[2]) + '_main',
-				nick: info[1],
-				msg: info[3]
-			});
+			if (/^#/.test(info[2]))
+			{
+				irc.call_hook('chan_notice', {
+					chan: irc.get_name(info[2]) + '_main',
+					nick: info[1],
+					msg: info[3]
+				});
+			}
 			return;
 		}
 		      
@@ -384,6 +387,7 @@ irc.connect = function(form)
 	
 	irc.get_name = function(chan)
 	{
+		console.log(chan);
 		if (chan === undefined)
 		{
 			chan = irc.current_chan;
