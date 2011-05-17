@@ -94,7 +94,7 @@ socket.on('connection', function(client)
 					
 				case "q":
 				case "quit":
-					client.irc.quit('https://github.com/callumacrae/irc-js/');
+					client.irc.quit('https://github.com/callumacrae/js-irc/');
 					break;
 				
 				case "me":
@@ -130,6 +130,6 @@ socket.on('connection', function(client)
 	client.on('disconnect', function()
 	{
 		if (client.irc_connected)
-			client.irc.quit('https://github.com/callumacrae/irc-js/');
+			client.irc.quit('https://github.com/callumacrae/js-irc/');
 	});
 });

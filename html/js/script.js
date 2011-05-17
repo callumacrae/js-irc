@@ -13,6 +13,7 @@ irc.prev_msgs = {
 	msgs: [],
 	current: 0
 };
+irc.runs = 0;
 
 function html_clean(string)
 {
@@ -241,7 +242,12 @@ irc.connect = function(form)
 				names_p = names_p.splice(0, names_p.length - 1);
 			}
 			irc.chans[info[1]].names = irc.chans[info[1]].names.concat(names_p);
-			
+			return;
+		}
+		
+		info = /:[0-9a-zA-Z.\-]+ 366 [0-9a-zA-Z\[\]\\`_\^{|}\-]+ ([^ ]+) :.+/.exec(data);
+		if (info)
+		{
 			irc.regen_names(info[1]);
 			return;
 		}
@@ -382,6 +388,7 @@ irc.connect = function(form)
 		
 		names = names.sort(function(a, b)
 		{
+			irc.runs++;
 			var a_num = get_num(a.slice(0, 1));
 			var b_num = get_num(b.slice(0, 1));
 			if (a_num !== b_num)
