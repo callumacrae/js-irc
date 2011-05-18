@@ -32,8 +32,8 @@ function html_clean(string)
 	regex = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/ig;
 	string = string.replace(regex, '<a href="mailto:$1">$1</a>');
 	
-	regex = /(#[^ ]+)/ig;
-	string = string.replace(regex, '<a href="javascript:irc.switch_chans(\'$1\')">$1</a>');
+	regex = /((?:^|\s+))(#[^# ]+)/ig;
+	string = string.replace(regex, '$1<a href="javascript:irc.switch_chans(\'$2\')">$2</a>');
 	
 	return string;
 }
