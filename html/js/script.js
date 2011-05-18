@@ -241,6 +241,28 @@ irc.connect = function(form)
 			return;
 		}
 		
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ QUIT :(.+)$/.exec(data);
+		if (info)
+		{
+			var chan, names;
+			for (chan in irc.chans)
+			{
+				names = irc.chans[chan].names;
+				if (names.indexOf(info[1]) !== -1)
+				{
+					irc.call_hook('chan_usr_quit', {
+						chan: irc.get_name(chan) + '_main',
+						nick: info[1],
+						msg: info[2]
+					});
+					
+					names.splice(names.indexOf(info[1]), 1);
+					irc.regen_names(chan);
+				}
+			}
+			return;
+		}
+		
 		//note: the below regex is incorrect, I have been unable to find the correct syntax as of yet
 		info = /^:[0-9a-zA-Z.\-]+ 353 [0-9a-zA-Z\[\]\\`_\^{|}\-]+ [=|@] ([^ ]+) :([%+@~&0-9a-zA-Z\[\]\\`_\^{|}\- ]+)$/.exec(data);
 		if (info)

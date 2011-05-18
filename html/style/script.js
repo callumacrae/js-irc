@@ -40,6 +40,12 @@ irc.add_hook('chan_usr_join', function(data)
 	window.scrollBy(0, 15);
 });
 
+irc.add_hook('chan_usr_quit', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' has quit. (' + html_clean(data.msg) + ')</li>';
+	window.scrollBy(0, 15);
+});
+
 irc.add_hook('chan_topic', function(data)
 {
 	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' changed the topic to ' + html_clean(data.topic) + '</li>';
@@ -111,6 +117,7 @@ irc.add_hook('about', function()
  chan_topic
  chan_usr_join
  chan_usr_part
+ chan_usr_quit
  *chan_join
  chan_part
  chan_switch
