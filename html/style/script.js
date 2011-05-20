@@ -65,46 +65,87 @@ irc.add_hook('global_topic', function(data)
 
 irc.add_hook('chan_part', function(chan)
 {
-	jQuery('#' + irc.get_name(chan) + '_main').remove();
-	jQuery('#' + irc.get_name(chan) + '_names').remove();
+	jQuery('#' + irc.get_name(chan)).remove();
+	jQuery('#' + irc.get_name(chan, 'names')).remove();
 });
 
 irc.add_hook('chan_join', function(chan)
 {
-	document.getElementById('main').innerHTML += '<ul id="' + irc.get_name(chan) + '_main"></ul>';
-	document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan) + '_names"></ul>';
+	document.getElementById('main').innerHTML += '<ul id="' + irc.get_name(chan) + '"></ul>';
+	document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan, 'names') + '"></ul>';
 });
 
 irc.add_hook('chan_switch', function(chan)
 {
 	document.getElementsByTagName('header')[0].innerHTML = '<strong>' + html_clean(chan) + ':</strong> ' + html_clean(irc.chans[chan].topic);
-	jQuery('#' + irc.get_name() + '_main').hide();
-	jQuery('#' + irc.get_name(chan) + '_main').show();
-	jQuery('#' + irc.get_name() + '_names').hide();
-	jQuery('#' + irc.get_name(chan) + '_names').show();
+	jQuery('#' + irc.get_name()).hide();
+	jQuery('#' + irc.get_name(chan)).show();
+	jQuery('#' + irc.get_name(undefined, 'names')).hide();
+	jQuery('#' + irc.get_name(chan, 'names')).show();
+});
+
+irc.add_hook('chan_hide', function(chan)
+{
+	jQuery('#' + irc.get_name(chan)).hide();
+	jQuery('#' + irc.get_name(chan, 'names')).hide();
+});
+
+irc.add_hook('chan_show', function(chan)
+{
+	document.getElementsByTagName('header')[0].innerHTML = '<strong>' + html_clean(chan) + ':</strong> ' + html_clean(irc.chans[chan].topic);
+	jQuery('#' + irc.get_name(chan)).show();
+	jQuery('#' + irc.get_name(chan, 'names')).show();
+});
+
+irc.add_hook('pm_hide', function(chan)
+{
+	jQuery('#' + irc.get_name(chan, 'pm')).hide();
+});
+
+irc.add_hook('pm_show', function(chan)
+{
+	document.getElementsByTagName('header')[0].innerHTML = '<strong>' + html_clean(chan) + '</strong>';
+	jQuery('#' + irc.get_name(chan, 'pm')).show();
 });
 
 irc.add_hook('global_notice', function(msg)
 {
 	for (var chan in irc.chans)
-		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>Notice:</strong> ' + html_clean(msg) + '</li>';
+		document.getElementById(irc.get_name(chan)).innerHTML += '<li><strong>Notice:</strong> ' + html_clean(msg) + '</li>';
 });
 
 irc.add_hook('global_error', function(msg)
 {
 	for (var chan in irc.chans)
-		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>Error:</strong> ' + html_clean(msg) + '</li>';
+		document.getElementById(irc.get_name(chan)).innerHTML += '<li><strong>Error:</strong> ' + html_clean(msg) + '</li>';
 });
 
 irc.add_hook('quit', function(msg)
 {
 	for (var chan in irc.chans)
-		document.getElementById(irc.get_name(chan) + '_main').innerHTML += '<li><strong>You have quit</strong> (' + html_clean(msg) + ')</li>';
+		document.getElementById(irc.get_name(chan)).innerHTML += '<li><strong>You have quit</strong> (' + html_clean(msg) + ')</li>';
 });
 
 irc.add_hook('about', function()
 {
 	alert('This IRC client was built by Callum Macrae.')
+});
+
+irc.add_hook('pm_open', function(nick)
+{
+	document.getElementById('main').innerHTML += '<ul id="' + nick + '_pm"></ul>';
+});
+
+irc.add_hook('pm_msg', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li><strong>' + data.nick + '</strong>: ' + html_clean(data.msg) + '</li>';
+	window.scrollBy(0, 15);
+});
+
+irc.add_hook('pm_msg_hl', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li class="highlight"><strong>' + data.nick + '</strong>: ' + html_clean(data.msg) + '</li>';
+	window.scrollBy(0, 15);
 });
 
 /*
