@@ -10,7 +10,16 @@ var options = require('./config'),
 server = http.createServer(function (req, res)
 {
 	req.setEncoding('utf8');
-	var filename = path.join(process.cwd(), 'html/' + ((req.url == '/') ? 'index.html' : url.parse(req.url).pathname));
+	var filename = 'html' + ((req.url == '/') ? '/index.html' : url.parse(req.url).pathname);
+	
+	if (filename == 'html/js/config.js')
+	{
+		res.writeHeader(200);
+		res.end('var config = { ip:"' + options.server.address + '", port:' + options.server.port + '};', "binary");
+		return;
+	}
+	
+	filename = path.join(process.cwd(), filename);
 	
 	path.exists(filename, function(exists)
 	{  
@@ -35,7 +44,7 @@ server = http.createServer(function (req, res)
 		});
 	});
 });
-server.listen(1337, "127.0.0.1");
+server.listen(options.server.port, options.server.address);
 
 function write(text)
 {
@@ -58,17 +67,19 @@ socket.on('connection', function(client)
 			{
 				for (var item in data)
 				{
-					options[item] = data[item];
+					options.irc[item] = data[item];
 				}
 					
 				return dns.resolve(data.server, 'A', function(err)
 				{
 					if (err)
+					{
 						return false;
+					}
 					
 					client.irc_info = data;
 					write('Connecting to ' + data.server);
-					client.irc = new IRC(options, client);
+					client.irc = new IRC(options.irc, client);
 					client.irc.connect();
 					client.irc.on('error', function(data)
 					{

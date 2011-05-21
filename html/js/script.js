@@ -42,7 +42,7 @@ function html_clean(string)
 
 irc.connect = function(form)
 {
-	irc.socket = new io.Socket('127.0.0.1', {port:1337});
+	irc.socket = new io.Socket(config.ip, {port:config.port});
 	irc.socket.connect();
 	irc.socket.send({server:form.server.value, nick:form.nick.value});
 	irc.current_nick = form.nick.value;
