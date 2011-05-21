@@ -10,11 +10,7 @@ var options = require('./config'),
 server = http.createServer(function (req, res)
 {
 	req.setEncoding('utf8');
-	
-	if (req.url == '/')
-		var filename = path.join(process.cwd(), 'html/index.html');
-	else
-		var filename = path.join(process.cwd(), 'html/' + url.parse(req.url).pathname);
+	var filename = path.join(process.cwd(), 'html/' + ((req.url == '/') ? 'index.html' : url.parse(req.url).pathname));
 	
 	path.exists(filename, function(exists)
 	{  
@@ -41,6 +37,15 @@ server = http.createServer(function (req, res)
 });
 server.listen(1337, "127.0.0.1");
 
+function write(text)
+{
+	var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	var d = new Date();
+	var date = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+	
+	console.log(date + ' - ' + text);
+}
+
 var socket = io.listen(server);
 socket.on('connection', function(client)
 {
@@ -52,18 +57,22 @@ socket.on('connection', function(client)
 			if (data.server !== undefined && data.nick !== undefined)
 			{
 				for (var item in data)
+				{
 					options[item] = data[item];
+				}
 					
 				return dns.resolve(data.server, 'A', function(err)
 				{
 					if (err)
 						return false;
 					
-					console.log('Connecting to ' + data.server);
+					client.irc_info = data;
+					write('Connecting to ' + data.server);
 					client.irc = new IRC(options, client);
 					client.irc.connect();
 					client.irc.on('error', function(data)
 					{
+						write('An error occurred:');
 						console.log(data);
 					});
 					client.irc_connected = true;
@@ -95,6 +104,8 @@ socket.on('connection', function(client)
 				case "q":
 				case "quit":
 					client.irc.quit('https://github.com/callumacrae/js-irc/');
+					write('Disconnected from ' + client.irc_info.server);
+					client.irc_connected = false;
 					break;
 				
 				case "me":
@@ -121,7 +132,9 @@ socket.on('connection', function(client)
 		else
 		{
 			if (data.msg.slice(0, 2) == '//')
+			{
 				data.msg = data.msg.slice(1, data.msg.length);
+			}
 			client.irc.privmsg(data.chan, data.msg);
 		}
 		return true;
@@ -130,6 +143,9 @@ socket.on('connection', function(client)
 	client.on('disconnect', function()
 	{
 		if (client.irc_connected)
+		{
 			client.irc.quit('https://github.com/callumacrae/js-irc/');
+		}
+		write('Disconnected from ' + client.irc_info.server);
 	});
 });
