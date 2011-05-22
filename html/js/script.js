@@ -176,8 +176,6 @@ irc.connect = function(form)
 				{
 					irc.switch_chans(info[1]);
 				}
-				
-				console.log(info);
 					
 				irc.call_hook(info[3].search(irc.current_nick) !== -1 ? 'pm_msg_hl' : 'pm_msg', {
 					chan: irc.get_name(info[1], 'pm'),
@@ -216,11 +214,14 @@ irc.connect = function(form)
 		info = /^::ZIRCKSELF PRIVMSG ([^:]+) :(.+)$/.exec(data);
 		if (info)
 		{
-			irc.call_hook('chan_msg', {
-				chan: irc.get_name(info[1]),
-				nick: irc.current_nick,
-				msg: info[2]
-			});
+			if (/^#/.test(info[1]))
+			{
+				irc.call_hook('chan_msg', {
+					chan: irc.get_name(info[1]),
+					nick: irc.current_nick,
+					msg: info[2]
+				});
+			}
 			return;
 		}
 		      
