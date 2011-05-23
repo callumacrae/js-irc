@@ -48,13 +48,31 @@ irc.add_hook('chan_usr_quit', function(data)
 
 irc.add_hook('chan_topic', function(data)
 {
-	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' changed the topic to ' + html_clean(data.topic) + '</li>';
+	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' changed the topic to "' + html_clean(data.topic) + '"</li>';
 	window.scrollBy(0, 15);
 });
 
 irc.add_hook('chan_nick', function(data)
 {
 	document.getElementById(data.chan).innerHTML += '<li>' + data.old_nick + ' is now known as ' + data.new_nick + '</li>';
+	window.scrollBy(0, 15);
+});
+
+irc.add_hook('chan_kick', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li>You were kicked from the channel by ' + data.by + '. (' + html_clean(data.msg) + ')</li><li>Rejoining...</li>';
+	window.scrollBy(0, 15);
+});
+
+irc.add_hook('chan_usr_kick', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' was kicked from the channel by ' + data.by + '. (' + html_clean(data.msg) + ')</li>';
+	window.scrollBy(0, 15);
+});
+
+irc.add_hook('chan_error', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li><strong>Error: ' + data.msg + '</strong></li>';
 	window.scrollBy(0, 15);
 });
 

@@ -51,27 +51,82 @@ irc.connect = function(form)
 	{
 		document.getElementById('console_main').innerHTML += '<li>' + data + '</li>';
 
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ JOIN :(.+)$/.exec(data);
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) :(.+)$/.exec(data);
 		if (info)
 		{
-			if (info[1] === irc.current_nick)
+			switch (info[2])
 			{
-				irc.switch_chans(info[2]);
-			}
-			else
-			{
-				irc.call_hook('chan_usr_join', {
-					chan: irc.get_name(info[2]),
-					nick: info[1]
-				});
+				case 'JOIN':
+					if (info[1] === irc.current_nick)
+					{
+						irc.switch_chans(info[3]);
+					}
+					else
+					{
+						irc.call_hook('chan_usr_join', {
+							chan: irc.get_name(info[3]),
+							nick: info[1]
+						});
 
-				irc.chans[info[2]].names.push(info[1]);
-				irc.regen_names(info[2]);
+						irc.chans[info[2]].names.push(info[1]);
+						irc.regen_names(info[3]);
+					}
+					return;
+
+				case 'NICK':
+					var chan, names;
+					if (irc.current_nick === info[1])
+					{
+						irc.current_nick = info[3];
+					}
+
+					for (chan in irc.chans)
+					{
+						names = irc.chans[chan].names;
+						if (names.indexOf(info[1]) !== -1)
+						{
+							irc.call_hook('chan_nick', {
+								chan: irc.get_name(chan),
+								old_nick: info[1],
+								new_nick: info[3]
+							});
+
+							names.splice(names.indexOf(info[1]), 1, info[3]);
+							irc.regen_names(chan);
+						}
+					}
+					return;
+
+				case 'QUIT':
+					if (info[1] === irc.current_nick)
+					{
+						irc.call_hook('quit', info[1]);
+						irc.connected = false;
+						irc.socket.disconnect();
+						return;
+					}
+
+					var chan, names;
+					for (chan in irc.chans)
+					{
+						names = irc.chans[chan].names;
+						if (names.indexOf(info[1]) !== -1)
+						{
+							irc.call_hook('chan_usr_quit', {
+								chan: irc.get_name(chan),
+								nick: info[1],
+								msg: info[3]
+							});
+
+							names.splice(names.indexOf(info[1]), 1);
+							irc.regen_names(chan);
+						}
+					}
+					return;
 			}
-			return;
 		}
 
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ (PART|TOPIC) ([^:]+) :(.+)$/.exec(data);
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) ([^:]+) :(.+)$/.exec(data);
 		if (info)
 		{
 			switch (info[2])
@@ -111,7 +166,7 @@ irc.connect = function(form)
 							irc.regen_names(info[3]);
 						}
 					}
-					break;
+					return;
 
 				case 'TOPIC':
 					irc.chans[info[3]].topic = info[4];
@@ -128,9 +183,86 @@ irc.connect = function(form)
 							topic: info[4]
 						});
 					}
-					break;
+					return;
+
+				case 'PRIVMSG':
+				case 'NOTICE':
+					var action = /^\x01ACTION (.+)\x01$/.exec(info[4]);
+					var highlight = info[4].search(irc.current_nick) !== -1;
+					var notice = info[2] === 'NOTICE';
+					if (/^#/.test(info[3]))
+					{
+						var type = (notice) ? 'chan_notice' :
+							('chan_' + (action ? 'action' : 'msg') + (highlight ? '_hl' : ''));
+
+						irc.call_hook(type, {
+							chan: irc.get_name(info[3]),
+							nick: info[1],
+							msg: (action) ? action[1] : info[4]
+						});
+					}
+					else
+					{
+						if (irc.msgs[info[1]] === undefined)
+						{
+							irc.switch_chans(info[1]);
+						}
+						var type = (notice) ? 'pm_notice' :
+							('pm_msg' + (highlight ? '_hl' : ''));
+
+						irc.call_hook(type, {
+							chan: irc.get_name(info[1], 'pm'),
+							nick: info[1],
+							msg: info[4]
+						});
+					}
+					return;
 			}
-			return;
+		}
+
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) ([^:]+) ([^:]+) :(.+)$/.exec(data);
+		if (info)
+		{
+			switch (info[2])
+			{
+				case 'KICK':
+					if (info[4] === irc.current_nick)
+					{
+						irc.call_hook('chan_kick', {
+							chan: irc.get_name(info[3]),
+							by: info[1],
+							msg: info[5]
+						});
+						irc.socket.send({msg:'/join ' + info[3], chan:irc.current_chan});
+					}
+					else
+					{
+						irc.call_hook('chan_usr_kick', {
+							chan: irc.get_name(info[3]),
+							by: info[1],
+							nick: info[4],
+							msg: info[5]
+						});
+
+						var names = irc.chans[info[3]].names,
+							i, index = false;
+						for (i = 0; i < names.length; i++)
+						{
+							if (new RegExp('[~&@%+]?' + info[1]).test(names[i]))
+							{
+								index = i;
+								break;
+							}
+						}
+
+						if (index !== false)
+						{
+							names.splice(index, 1);
+							irc.regen_names(info[3]);
+						}
+					}
+					return;
+			}
 		}
 
 		info = /^:[0-9a-zA-Z.\-]+ ([0-9]{3}) [^ ]+ (.+)$/.exec(data);
@@ -148,7 +280,7 @@ irc.connect = function(form)
 							topic: info[2]
 						});
 					}
-					break;
+					return;
 
 				case 353:
 					info = /^[=|@] ([^ ]+) :([%+@~&0-9a-zA-Z\[\]\\`_\^{|}\- ]+)$/.exec(info[2]);
@@ -163,109 +295,21 @@ irc.connect = function(form)
 						names_p = names_p.splice(0, names_p.length - 1);
 					}
 					irc.chans[info[1]].names = irc.chans[info[1]].names.concat(names_p);
-					break;
+					return;
 
 				case 366:
 					info = /^([^ ]+) :.+$/.exec(info[2]);
 					irc.regen_names(info[1]);
-					break;
-			}
-			return;
-		}
+					return;
 
-
-
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ (PRIVMSG|NOTICE) ([^:]+) :(.+)$/.exec(data);
-		if (info)
-		{
-			var action = /^\x01ACTION (.+)\x01$/.exec(info[4]);
-			var highlight = info[4].search(irc.current_nick) !== -1;
-			var notice = info[2] === 'NOTICE';
-			if (/^#/.test(info[3]))
-			{
-				var type = (notice) ? 'chan_notice' :
-					('chan_' + (action ? 'action' : 'msg') + (highlight ? '_hl' : ''));
-
-				irc.call_hook(type, {
-					chan: irc.get_name(info[3]),
-					nick: info[1],
-					msg: (action) ? action[1] : info[4]
-				});
-			}
-			else
-			{
-				if (irc.msgs[info[1]] === undefined)
-				{
-					irc.switch_chans(info[1]);
-				}
-				var type = (notice) ? 'pm_notice' :
-					('pm_msg' + (highlight ? '_hl' : ''));
-
-				irc.call_hook(type, {
-					chan: irc.get_name(info[1], 'pm'),
-					nick: info[1],
-					msg: info[4]
-				});
-			}
-			return;
-		}
-
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ NICK :(.+)$/.exec(data);
-		if (info)
-		{
-			var chan, names;
-
-			if (irc.current_nick === info[1])
-			{
-				irc.current_nick = info[2];
-			}
-
-			for (chan in irc.chans)
-			{
-				names = irc.chans[chan].names;
-				if (names.indexOf(info[1]) !== -1)
-				{
-					irc.call_hook('chan_nick', {
-						chan: irc.get_name(chan),
-						old_nick: info[1],
-						new_nick: info[2]
-					});
-
-					names.splice(names.indexOf(info[1]), 1, info[2]);
-					irc.regen_names(chan);
-				}
-			}
-			return;
-		}
-
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ QUIT :(.*)$/.exec(data);
-		if (info)
-		{
-			if (info[1] === irc.current_nick)
-			{
-				irc.call_hook('quit', info[1]);
-				irc.connected = false;
-				irc.socket.disconnect();
-				return;
-			}
-
-			var chan, names;
-			for (chan in irc.chans)
-			{
-				names = irc.chans[chan].names;
-				if (names.indexOf(info[1]) !== -1)
-				{
-					irc.call_hook('chan_usr_quit', {
-						chan: irc.get_name(chan),
-						nick: info[1],
+				case 474:
+					info = /^([^ ]+) :(.+)$/.exec(info[2]);
+					irc.call_hook('chan_error', {
+						chan: (irc.chans[info[1]] === undefined) ? 'console_main' : irc.get_name(info[1]),
 						msg: info[2]
 					});
-
-					names.splice(names.indexOf(info[1]), 1);
-					irc.regen_names(chan);
-				}
+					return;
 			}
-			return;
 		}
 	});
 
