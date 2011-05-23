@@ -182,40 +182,6 @@ irc.connect = function(form)
 			}
 			return;
 		}
-		      
-		info = /^::ZIRCKSELF PRIVMSG ([^:]+) :\x01ACTION (.+)\x01$/.exec(data);
-		if (info)
-		{
-			irc.call_hook('chan_action', {
-				chan: irc.get_name(info[1]),
-				nick: irc.current_nick,
-				msg: info[2]
-			});
-			return;
-		}
-		      
-		info = /^::ZIRCKSELF PRIVMSG ([^:]+) :(.+)$/.exec(data);
-		if (info)
-		{
-			if (/^#/.test(info[1]))
-			{
-				irc.call_hook('chan_msg', {
-					chan: irc.get_name(info[1]),
-					nick: irc.current_nick,
-					msg: info[2]
-				});
-			}
-			return;
-		}
-		      
-		info = /^::ZIRCKSELF QUIT :(.+)$/.exec(data);
-		if (info)
-		{
-			irc.call_hook('quit', info[1]);
-			irc.connected = false;
-			irc.socket.disconnect();
-			return;
-		}
 		
 		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ NICK :(.+)$/.exec(data);
 		if (info)
@@ -248,6 +214,14 @@ irc.connect = function(form)
 		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ QUIT :(.*)$/.exec(data);
 		if (info)
 		{
+			if (info[1] === irc.current_nick)
+			{
+				irc.call_hook('quit', info[1]);
+				irc.connected = false;
+				irc.socket.disconnect();
+				return;
+			}
+			
 			var chan, names;
 			for (chan in irc.chans)
 			{

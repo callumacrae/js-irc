@@ -97,7 +97,6 @@ socket.on('connection', function(client)
 		{
 			return false;
 		}
-	
 		if (data.msg.slice(0, 1) == '/' && data.msg.slice(0, 2) != '//')
 		{
 			var index_of = data.msg.indexOf(' ') === -1 ? data.msg.length : data.msg.indexOf(' ');
