@@ -571,13 +571,19 @@ irc.connect = function(form)
 				
 				var start_pos = ctrl.value.lastIndexOf(' ', position) + 1,
 					text = ctrl.value.slice(start_pos, position),
-					text_final = null,
+					text_final,
 					text_once;
+					
+				if (!text)
+				{
+					break;
+				}
+				
 				if (text.slice(0, 1) === '#')
 				{
 					for (text_once in irc.chans)
 					{
-						if (text === text_once.slice(0, text.length))
+						if (text.toLowerCase() === text_once.slice(0, text.length).toLowerCase())
 						{
 							text_final = text_once;
 						}
@@ -590,11 +596,16 @@ irc.connect = function(form)
 					for (i = 0; i < names.length; i++)
 					{
 						spec = /^[~&@%+]/.test(names[i]);
-						if (text === names[i].slice(spec ? 1 : 0, text.length + (spec ? 1 : 0)))
+						if (text.toLowerCase() === names[i].slice(spec ? 1 : 0, text.length + (spec ? 1 : 0)).toLowerCase())
 						{
 							text_final = spec ? names[i].slice(1) : names[i];
 						}
 					}
+				}
+				
+				if (!text_final)
+				{
+					break;
 				}
 				
 				if (start_pos)
