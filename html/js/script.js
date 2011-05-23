@@ -148,26 +148,18 @@ irc.connect = function(form)
 			return;
 		}
 		      
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG ([^:]+) :\x01ACTION (.+)\x01$/.exec(data);
-		if (info)
-		{
-			irc.call_hook(info[3].search(irc.current_nick) !== -1 ? 'chan_action_hl' : 'chan_action', {
-				chan: irc.get_name(info[2]),
-				nick: info[1],
-				msg: info[3]
-			});
-			return;
-		}
-		      
 		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG ([^:]+) :(.+)$/.exec(data);
 		if (info)
 		{
+			var action = /^\x01ACTION (.+)\x01$/.exec(info[3]);
+			var highlight = info[3].search(irc.current_nick) !== -1;
 			if (/^#/.test(info[2]))
 			{
-				irc.call_hook(info[3].search(irc.current_nick) !== -1 ? 'chan_msg_hl' : 'chan_msg', {
+				var type = 'chan_' + (action ? 'action' : 'msg') + (highlight ? '_hl' : '');
+				irc.call_hook(type, {
 					chan: irc.get_name(info[2]),
 					nick: info[1],
-					msg: info[3]
+					msg: (action) ? action[1] : info[3]
 				});
 			}
 			else
@@ -177,7 +169,7 @@ irc.connect = function(form)
 					irc.switch_chans(info[1]);
 				}
 					
-				irc.call_hook(info[3].search(irc.current_nick) !== -1 ? 'pm_msg_hl' : 'pm_msg', {
+				irc.call_hook('pm_msg' + (highlight ? '_hl' : ''), {
 					chan: irc.get_name(info[1], 'pm'),
 					nick: info[1],
 					msg: info[3]
