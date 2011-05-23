@@ -113,7 +113,7 @@ socket.on('connection', function(client)
 					
 				case "q":
 				case "quit":
-					client.irc.quit('https://github.com/callumacrae/js-irc/');
+					client.irc.raw('QUIT :https://github.com/callumacrae/js-irc/').disconnect();
 					write('Disconnected from ' + client.irc_info.server);
 					client.irc_connected = false;
 					break;
@@ -154,7 +154,7 @@ socket.on('connection', function(client)
 	{
 		if (client.irc_connected)
 		{
-			client.irc.quit('https://github.com/callumacrae/js-irc/');
+			client.irc.raw('QUIT :https://github.com/callumacrae/js-irc/').disconnect();
 			write('Disconnected from ' + client.irc_info.server);
 		}
 	});

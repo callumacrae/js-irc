@@ -173,17 +173,16 @@ irc.add_hook('pm_notice', function(data)
  *chan_join
  chan_part
  chan_switch
- 
- *pm_msg
- *pm_msg_hl
- *pm_notice
+
+ pm_msg
+ pm_msg_hl
+ pm_notice
  *pm_nick
- *pm_open
- *pm_close
+ pm_open
+ pm_close
  *pm_start
- 
+
  global_topic
  global_notice
  global_error
- 
 */
