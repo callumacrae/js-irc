@@ -148,18 +148,21 @@ irc.connect = function(form)
 			return;
 		}
 		      
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ PRIVMSG ([^:]+) :(.+)$/.exec(data);
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ (PRIVMSG|NOTICE) ([^:]+) :(.+)$/.exec(data);
 		if (info)
 		{
-			var action = /^\x01ACTION (.+)\x01$/.exec(info[3]);
-			var highlight = info[3].search(irc.current_nick) !== -1;
-			if (/^#/.test(info[2]))
+			var action = /^\x01ACTION (.+)\x01$/.exec(info[4]);
+			var highlight = info[4].search(irc.current_nick) !== -1;
+			var notice = info[2] === 'NOTICE';
+			if (/^#/.test(info[3]))
 			{
-				var type = 'chan_' + (action ? 'action' : 'msg') + (highlight ? '_hl' : '');
+				var type = (notice) ? 'chan_notice' :
+					('chan_' + (action ? 'action' : 'msg') + (highlight ? '_hl' : ''));
+				
 				irc.call_hook(type, {
-					chan: irc.get_name(info[2]),
+					chan: irc.get_name(info[3]),
 					nick: info[1],
-					msg: (action) ? action[1] : info[3]
+					msg: (action) ? action[1] : info[4]
 				});
 			}
 			else
@@ -168,25 +171,13 @@ irc.connect = function(form)
 				{
 					irc.switch_chans(info[1]);
 				}
-					
-				irc.call_hook('pm_msg' + (highlight ? '_hl' : ''), {
+				var type = (notice) ? 'pm_notice' :
+					('pm_msg' + (highlight ? '_hl' : ''));
+				
+				irc.call_hook(type, {
 					chan: irc.get_name(info[1], 'pm'),
 					nick: info[1],
-					msg: info[3]
-				});
-			}
-			return;
-		}
-		
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ NOTICE ([^:]+) :(.+)$/.exec(data);
-		if (info)
-		{
-			if (/^#/.test(info[2]))
-			{
-				irc.call_hook('chan_notice', {
-					chan: irc.get_name(info[2]),
-					nick: info[1],
-					msg: info[3]
+					msg: info[4]
 				});
 			}
 			return;
@@ -331,6 +322,17 @@ irc.connect = function(form)
 					irc.call_hook('about');
 					cancel_send = true;
 					break;
+				
+				case 'part':
+				case 'query':
+					if (!/^#/.test(irc.current_chan))
+					{
+						delete irc.msgs[irc.current_chan];
+						irc.call_hook('pm_close', irc.current_chan);
+						irc.regen_chans();
+						cancel_send = true;
+					}
+					break;
 			}
 		}
 		
@@ -433,6 +435,7 @@ irc.connect = function(form)
 		}
 		
 		chans_ul = document.getElementById('left_msgs_ul');
+		chans_ul.innerHTML = '';
 		for (chan in chans)
 		{
 			chans_ul.innerHTML += '<li><a onclick="irc.switch_chans(\'' + chan + '\')"><strong>' + chan + '</strong></a></li>';

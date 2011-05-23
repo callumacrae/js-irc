@@ -136,6 +136,11 @@ irc.add_hook('pm_open', function(nick)
 	document.getElementById('main').innerHTML += '<ul id="' + nick + '_pm"></ul>';
 });
 
+irc.add_hook('pm_close', function(nick)
+{
+	$('#' + nick + '_pm').remove();
+});
+
 irc.add_hook('pm_msg', function(data)
 {
 	document.getElementById(data.chan).innerHTML += '<li><strong>' + data.nick + '</strong>: ' + html_clean(data.msg) + '</li>';
@@ -145,6 +150,12 @@ irc.add_hook('pm_msg', function(data)
 irc.add_hook('pm_msg_hl', function(data)
 {
 	document.getElementById(data.chan).innerHTML += '<li class="highlight"><strong>' + data.nick + '</strong>: ' + html_clean(data.msg) + '</li>';
+	window.scrollBy(0, 15);
+});
+
+irc.add_hook('pm_notice', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li class="notice"><strong>-' + data.nick + '-</strong> ' + html_clean(data.msg) + '</li>';
 	window.scrollBy(0, 15);
 });
 
