@@ -42,7 +42,7 @@ irc.add_hook('chan_usr_join', function(data)
 
 irc.add_hook('chan_usr_quit', function(data)
 {
-	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' has quit. (' + html_clean(data.msg) + ')</li>';
+	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' has quit.' + ((data.msg) ? ' (' + html_clean(data.msg) + ')' : '') + '</li>';
 	window.scrollBy(0, 15);
 });
 

@@ -245,7 +245,7 @@ irc.connect = function(form)
 			return;
 		}
 		
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ QUIT :(.+)$/.exec(data);
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ QUIT :(.*)$/.exec(data);
 		if (info)
 		{
 			var chan, names;
@@ -523,7 +523,7 @@ irc.connect = function(form)
 		
 		if (/^#/.test(chan))
 		{
-			chan = irc.chans[chan.toLowerCase()].divname;
+			chan = irc.chans[chan].divname;
 		}
 		else
 		{
