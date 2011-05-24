@@ -203,16 +203,17 @@ irc.connect = function(form)
 					}
 					else
 					{
-						if (irc.msgs[info[1]] === undefined)
+						var them = info[(info[1] === irc.current_nick) ? 3 : 1];
+						if (irc.msgs[them] === undefined)
 						{
-							irc.switch_chans(info[1]);
+							irc.switch_chans(them);
 						}
 						var type = (notice) ? 'pm_notice' :
 							('pm_msg' + (highlight ? '_hl' : ''));
 
 						irc.call_hook(type, {
-							chan: irc.get_name(info[1], 'pm'),
-							nick: info[1],
+							chan: irc.get_name(them, 'pm'),
+							nick: them,
 							msg: info[4]
 						});
 					}
