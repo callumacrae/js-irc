@@ -1,3 +1,7 @@
+/**
+ * Initiate stuff.
+ * Just stuff.
+ */
 var irc = {};
 irc.chans = {
 	console: {
@@ -16,6 +20,13 @@ irc.prev_msgs = {
 	current: 0
 };
 
+/**
+ * This function just takes the string and formats it.
+ *
+ * It escapes all "unsafe" characters, and if the format
+ * parameter is true or not defined, also auto linkifies
+ * links and chans, and turns bold into bold etc.
+ */
 function html_clean(string, format)
 {
 	if (format === undefined)
@@ -58,6 +69,10 @@ function html_clean(string, format)
 
 irc.connect = function(form)
 {
+	/**
+	 * Lots of sockets stuff for a bit.
+	 */
+
 	irc.socket = new io.Socket(config.ip, {port:config.port});
 	irc.socket.connect();
 	irc.socket.send({server:form.server.value, nick:form.nick.value});
@@ -148,6 +163,52 @@ irc.connect = function(form)
 		{
 			switch (info[2])
 			{
+				case 'MODE':
+					if (/^#/.test(info[3]))
+					{
+						irc.call_hook('chan_mode', {
+							chan: irc.get_name(info[3]),
+							nick: info[1],
+							mode: info[4]
+						});
+						irc.regen_names(info[3]);
+					}
+					return;
+
+				case 'NOTICE':
+				case 'PRIVMSG':
+					var action = /^\x01ACTION (.+)\x01$/.exec(info[4]);
+					var highlight = info[4].search(irc.current_nick) !== -1;
+					var notice = info[2] === 'NOTICE';
+					if (/^#/.test(info[3]))
+					{
+						var type = (notice) ? 'chan_notice' :
+							('chan_' + (action ? 'action' : 'msg') + (highlight ? '_hl' : ''));
+
+						irc.call_hook(type, {
+							chan: irc.get_name(info[3]),
+							nick: info[1],
+							msg: (action) ? action[1] : info[4]
+						});
+					}
+					else
+					{
+						var them = info[(info[1] === irc.current_nick) ? 3 : 1];
+						if (irc.msgs[them] === undefined)
+						{
+							irc.switch_chans(them);
+						}
+						var type = (notice) ? 'pm_notice' :
+							('pm_msg' + (highlight ? '_hl' : ''));
+
+						irc.call_hook(type, {
+							chan: irc.get_name(them, 'pm'),
+							nick: info[1],
+							msg: info[4]
+						});
+					}
+					return;
+
 				case 'PART':
 					if (info[1] === irc.current_nick)
 					{
@@ -199,52 +260,6 @@ irc.connect = function(form)
 							chan: info[3],
 							topic: info[4]
 						});
-					}
-					return;
-
-				case 'PRIVMSG':
-				case 'NOTICE':
-					var action = /^\x01ACTION (.+)\x01$/.exec(info[4]);
-					var highlight = info[4].search(irc.current_nick) !== -1;
-					var notice = info[2] === 'NOTICE';
-					if (/^#/.test(info[3]))
-					{
-						var type = (notice) ? 'chan_notice' :
-							('chan_' + (action ? 'action' : 'msg') + (highlight ? '_hl' : ''));
-
-						irc.call_hook(type, {
-							chan: irc.get_name(info[3]),
-							nick: info[1],
-							msg: (action) ? action[1] : info[4]
-						});
-					}
-					else
-					{
-						var them = info[(info[1] === irc.current_nick) ? 3 : 1];
-						if (irc.msgs[them] === undefined)
-						{
-							irc.switch_chans(them);
-						}
-						var type = (notice) ? 'pm_notice' :
-							('pm_msg' + (highlight ? '_hl' : ''));
-
-						irc.call_hook(type, {
-							chan: irc.get_name(them, 'pm'),
-							nick: info[1],
-							msg: info[4]
-						});
-					}
-					return;
-
-				case 'MODE':
-					if (/^#/.test(info[3]))
-					{
-						irc.call_hook('chan_mode', {
-							chan: irc.get_name(info[3]),
-							nick: info[1],
-							mode: info[4]
-						});
-						irc.regen_names(info[3]);
 					}
 					return;
 			}
@@ -361,47 +376,25 @@ irc.connect = function(form)
 		}
 	});
 
-	irc.send_msg = function(form)
+
+	/**
+	 * Functions start here!
+	 * Just boring socket stuff before here.
+	 */
+
+	irc.get_name = function(chan, state)
 	{
-		if (form.msg.value === '')
+		if (chan === undefined)
 		{
-			return false;
+			chan = irc.current_chan;
+		}
+		if (state === undefined)
+		{
+			state = 'main';
 		}
 
-		irc.prev_msgs.msgs.push(form.msg.value);
-
-		var cancel_send = false;
-		if (form.msg.value.slice(0, 1) === '/' && form.msg.value.slice(0, 2) !== '//')
-		{
-			var end = form.msg.value.indexOf(' ') === -1 ? form.msg.value.length : form.msg.value.indexOf(' ');
-			var command = form.msg.value.slice(1, end);
-			var rest_of = form.msg.value.slice(form.msg.value.indexOf(' ') + 1);
-			switch (command)
-			{
-				case 'about':
-					irc.call_hook('about');
-					cancel_send = true;
-					break;
-
-				case 'part':
-				case 'query':
-					if (!/^#/.test(irc.current_chan))
-					{
-						delete irc.msgs[irc.current_chan];
-						irc.call_hook('pm_close', irc.current_chan);
-						irc.regen_chans();
-						cancel_send = true;
-					}
-					break;
-			}
-		}
-
-		if (!cancel_send)
-		{
-			irc.socket.send({msg:form.msg.value, chan:irc.current_chan});
-		}
-		form.msg.value = '';
-		return false;
+		chan = (/^#/.test(chan)) ? irc.chans[chan].divname : chan.replace(/([^a-zA-Z0-9])/, '\\$1');
+		return chan + '_' + state;
 	}
 
 	irc.join_chan = function(chan)
@@ -409,40 +402,19 @@ irc.connect = function(form)
 		irc.socket.send({msg:'/join ' + chan, chan:irc.current_chan});
 	}
 
-	irc.switch_chans = function(chan)
+	irc.make_name = function(chan)
 	{
-		if (/^#/.test(chan) || chan === 'console')
+		var channel, name = Math.random().toString(32);
+		for (channel in irc.chans)
 		{
-			if (irc.chans[chan] === undefined)
+			if (channel.divname === name)
 			{
-				irc.join_chan(chan);
-				irc.chans[chan] = {
-					divname: irc.make_name(chan),
-					names: [],
-					topic: ''
-				};
-				irc.call_hook('chan_join', chan);
-				irc.regen_chans();
+				name = irc.make_name(chan);
+				break;
 			}
-			irc.call_hook(irc.current_type + '_hide', irc.current_chan);
-			irc.call_hook('chan_show', chan);
-			irc.current_type = 'chan';
 		}
-		else
-		{
-			if (irc.msgs[chan] === undefined)
-			{
-				irc.msgs[chan] = {
-					divname: chan
-				};
-				irc.call_hook('pm_open', chan);
-				irc.regen_chans();
-			}
-			irc.call_hook(irc.current_type + '_hide', irc.current_chan);
-			irc.call_hook('pm_show', chan);
-			irc.current_type = 'pm';
-		}
-		irc.current_chan = chan;
+		name = name.replace('.', ''); //jQuery hates me
+		return name;
 	}
 
 	irc.regen_chans = function()
@@ -567,35 +539,89 @@ irc.connect = function(form)
 		return true;
 	}
 
-	irc.get_name = function(chan, state)
+	irc.send_msg = function(form)
 	{
-		if (chan === undefined)
+		if (form.msg.value === '')
 		{
-			chan = irc.current_chan;
-		}
-		if (state === undefined)
-		{
-			state = 'main';
+			return false;
 		}
 
-		chan = (/^#/.test(chan)) ? irc.chans[chan].divname : chan.replace(/([^a-zA-Z0-9])/, '\\$1');
-		return chan + '_' + state;
-	}
+		irc.prev_msgs.msgs.push(form.msg.value);
 
-	irc.make_name = function(chan)
-	{
-		var channel, name = Math.random().toString(32);
-		for (channel in irc.chans)
+		var cancel_send = false;
+		if (form.msg.value.slice(0, 1) === '/' && form.msg.value.slice(0, 2) !== '//')
 		{
-			if (channel.divname === name)
+			var end = form.msg.value.indexOf(' ') === -1 ? form.msg.value.length : form.msg.value.indexOf(' ');
+			var command = form.msg.value.slice(1, end);
+			var rest_of = form.msg.value.slice(form.msg.value.indexOf(' ') + 1);
+			switch (command)
 			{
-				name = irc.make_name(chan);
-				break;
+				case 'about':
+					irc.call_hook('about');
+					cancel_send = true;
+					break;
+
+				case 'part':
+				case 'query':
+					if (!/^#/.test(irc.current_chan))
+					{
+						delete irc.msgs[irc.current_chan];
+						irc.call_hook('pm_close', irc.current_chan);
+						irc.regen_chans();
+						cancel_send = true;
+					}
+					break;
 			}
 		}
-		name = name.replace('.', ''); //jQuery hates me
-		return name;
+
+		if (!cancel_send)
+		{
+			irc.socket.send({msg:form.msg.value, chan:irc.current_chan});
+		}
+		form.msg.value = '';
+		return false;
 	}
+
+	irc.switch_chans = function(chan)
+	{
+		if (/^#/.test(chan) || chan === 'console')
+		{
+			if (irc.chans[chan] === undefined)
+			{
+				irc.join_chan(chan);
+				irc.chans[chan] = {
+					divname: irc.make_name(chan),
+					names: [],
+					topic: ''
+				};
+				irc.call_hook('chan_join', chan);
+				irc.regen_chans();
+			}
+			irc.call_hook(irc.current_type + '_hide', irc.current_chan);
+			irc.call_hook('chan_show', chan);
+			irc.current_type = 'chan';
+		}
+		else
+		{
+			if (irc.msgs[chan] === undefined)
+			{
+				irc.msgs[chan] = {
+					divname: chan
+				};
+				irc.call_hook('pm_open', chan);
+				irc.regen_chans();
+			}
+			irc.call_hook(irc.current_type + '_hide', irc.current_chan);
+			irc.call_hook('pm_show', chan);
+			irc.current_type = 'pm';
+		}
+		irc.current_chan = chan;
+	}
+
+
+	/**
+	 * UI stuff starts here.
+	 */
 
 	$(document).keydown(function(event)
 	{
@@ -672,23 +698,6 @@ irc.connect = function(form)
 
 				break;
 
-			case 191: //forward stroke ("/")
-				var jinput = $('#msginput'),
-					input = document.getElementById('msginput');
-				if (!jinput.is(':focus'))
-				{
-					jinput.focus();
-					if (input.value === '')
-					{
-						input.value = '/';
-					}
-				}
-				else
-				{
-					kill = false;
-				}
-				break;
-
 			case 38: //up key
 				if (!$('#msginput').is(':focus'))
 				{
@@ -732,6 +741,23 @@ irc.connect = function(form)
 
 				break;
 
+			case 191: //forward stroke ("/")
+				var jinput = $('#msginput'),
+					input = document.getElementById('msginput');
+				if (!jinput.is(':focus'))
+				{
+					jinput.focus();
+					if (input.value === '')
+					{
+						input.value = '/';
+					}
+				}
+				else
+				{
+					kill = false;
+				}
+				break;
+
 
 			default:
 				if ($('#msginput').is(':focus') && irc.prev_msgs.current !== 0)
@@ -747,6 +773,10 @@ irc.connect = function(form)
 		}
 	});
 }
+
+/**
+ * The hooks stuff.
+ */
 
 irc.add_hook = function(name, callback)
 {

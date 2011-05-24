@@ -25,22 +25,22 @@ server = http.createServer(function (req, res)
 	{
 		if (!exists)
 		{
-			res.writeHeader(404, {"Content-Type": "text/plain"});
-			res.end("404 Not Found\n");
+			res.writeHeader(404, {'Content-Type': 'text/plain'});
+			res.end('404 Not Found\n');
 			return;
 		}
 
 		fs.readFile(filename, "binary", function(err, file)
 		{
-			if(err)
+			if (err)
 			{
-				res.writeHeader(500, {"Content-Type": "text/plain"});
-				res.end(err + "\n");
+				res.writeHeader(500, {'Content-Type': 'text/plain'});
+				res.end(err + '\n');
 				return;
 			}
 
 			res.writeHeader(200);
-			res.end(file, "binary");
+			res.end(file, 'binary');
 		});
 	});
 });
@@ -102,40 +102,44 @@ socket.on('connection', function(client)
 			var index_of = data.msg.indexOf(' ') === -1 ? data.msg.length : data.msg.indexOf(' ');
 			var command = data.msg.slice(1, index_of);
 			var rest_of = data.msg.slice(index_of + 1);
-			switch (command)
+			switch (command.toLowerCase())
 			{
-				case "msg":
-				case "query":
+				case 'cs':
+					client.irc.raw('PRIVMSG ChanServ ' + rest_of);
+					break;
+
+				case 'me':
+					client.irc.raw('PRIVMSG ' + data.chan + ' :\u0001ACTION ' + rest_of + '\u0001');
+					break;
+
+				case 'msg':
+				case 'query':
 					var nick = rest_of.slice(0, rest_of.indexOf(' '));
 					var msg = rest_of.slice(rest_of.indexOf(' ') + 1, rest_of.length);
 					client.irc.raw('PRIVMSG ' + nick + ' :' + msg);
 					break;
 
-				case "q":
-				case "quit":
-					client.irc.raw('QUIT :https://github.com/callumacrae/js-irc/').disconnect();
-					write('Disconnected from ' + client.irc_info.server);
-					client.irc_connected = false;
-					break;
-
-				case "me":
-					client.irc.raw('PRIVMSG ' + data.chan + ' :\u0001ACTION ' + rest_of + '\u0001');
-					break;
-
-				case "ns":
+				case 'ns':
 					client.irc.raw('PRIVMSG NickServ ' + rest_of);
 					break;
 
-				case "cs":
-					client.irc.raw('PRIVMSG ChanServ ' + rest_of);
-					break;
-
-				case "slap":
+				case 'slap':
 					if (rest_of.slice(rest_of.length - 1) === ' ')
 					{
 						rest_of = rest_of.slice(0, -1);
 					}
 					client.irc.raw('PRIVMSG ' + data.chan + ' :\u0001ACTION slaps ' + rest_of + ' around a bit with a large trout.\u0001');
+					break;
+
+				case 'quote':
+					client.irc.raw(rest_of);
+					break;
+
+				case 'q':
+				case 'quit':
+					client.irc.raw('QUIT :https://github.com/callumacrae/js-irc/').disconnect();
+					write('Disconnected from ' + client.irc_info.server);
+					client.irc_connected = false;
 					break;
 
 				default:
