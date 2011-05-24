@@ -319,12 +319,14 @@ irc.connect = function(form)
 					return;
 
 				case 474:
+				case 477:
 					info = /^([^ ]+) :(.+)$/.exec(info[2]);
 					irc.call_hook('chan_error', {
 						chan: (irc.chans[info[1]] === undefined) ? 'console_main' : irc.get_name(info[1]),
 						msg: info[2]
 					});
 					return;
+
 			}
 		}
 	});
