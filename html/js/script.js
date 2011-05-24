@@ -126,7 +126,7 @@ irc.connect = function(form)
 			}
 		}
 
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) ([^:]+) :(.+)$/.exec(data);
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) ([^: ]+) :?(.+)$/.exec(data);
 		if (info)
 		{
 			switch (info[2])
@@ -217,6 +217,14 @@ irc.connect = function(form)
 						});
 					}
 					return;
+
+				case 'MODE':
+					irc.call_hook('chan_mode', {
+						chan: irc.get_name(info[3]),
+						nick: info[1],
+						mode: info[4]
+					});
+					return;
 			}
 		}
 
@@ -300,6 +308,14 @@ irc.connect = function(form)
 				case 366:
 					info = /^([^ ]+) :.+$/.exec(info[2]);
 					irc.regen_names(info[1]);
+					return;
+
+				case 404:
+					info = /^([^:]+) :(.+)$/.exec(info[2]);
+					irc.call_hook('chan_error', {
+						chan: (irc.chans[info[1]] === undefined) ? 'console_main' : irc.get_name(info[1]),
+						msg: 'Could not send to channel: ' + info[2]
+					});
 					return;
 
 				case 474:

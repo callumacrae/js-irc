@@ -64,6 +64,12 @@ irc.add_hook('chan_kick', function(data)
 	window.scrollBy(0, 15);
 });
 
+irc.add_hook('chan_mode', function(data)
+{
+	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' sets mode ' + data.mode + '</li>';
+	window.scrollBy(0, 15);
+});
+
 irc.add_hook('chan_usr_kick', function(data)
 {
 	document.getElementById(data.chan).innerHTML += '<li>' + data.nick + ' was kicked from the channel by ' + data.by + '. (' + html_clean(data.msg) + ')</li>';
