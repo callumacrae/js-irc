@@ -12,13 +12,6 @@ server = http.createServer(function (req, res)
 	req.setEncoding('utf8');
 	var filename = 'html' + ((req.url == '/') ? '/index.html' : url.parse(req.url).pathname);
 
-	if (filename == 'html/js/config.js')
-	{
-		res.writeHeader(200);
-		res.end('var config = { ip:"' + options.server.address + '", port:' + options.server.port + '};', "binary");
-		return;
-	}
-
 	filename = path.join(process.cwd(), filename);
 
 	path.exists(filename, function(exists)
@@ -32,6 +25,7 @@ server = http.createServer(function (req, res)
 
 		fs.readFile(filename, "binary", function(err, file)
 		{
+			var file_ext, content_type;
 			if (err)
 			{
 				res.writeHeader(500, {'Content-Type': 'text/plain'});
@@ -39,7 +33,29 @@ server = http.createServer(function (req, res)
 				return;
 			}
 
-			res.writeHeader(200);
+			file_ext = /\.([a-z]+)$/.exec(filename)[1];
+			switch (file_ext)
+			{
+				case 'css':
+					content_type = 'text/css';
+					break;
+
+				case 'html':
+					content_type = 'text/html';
+
+					file = file.replace('REPLACEWITHCONFIGPLEASE', 'var config = { ip:"' + options.server.address + '", port:' + options.server.port + '};');
+					break;
+
+				case 'js':
+					content_type = 'application/javascript';
+					break;
+
+				default:
+					content_type = 'text/plain';
+					break;
+			}
+
+			res.writeHeader(200, {'Content-Type': content_type});
 			res.end(file, 'binary');
 		});
 	});
