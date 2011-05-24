@@ -16,25 +16,42 @@ irc.prev_msgs = {
 	current: 0
 };
 
-function html_clean(string)
+function html_clean(string, format)
 {
+	if (format === undefined)
+	{
+		format = true;
+	}
+
 	string = string.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;')
 		.replace(/'/g, '&#039;');
 
-	var regex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-	string = string.replace(regex, '<a href="$1" target="_blank">$1</a>');
+	if (format)
+	{
+		var regex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+		string = string.replace(regex, '<a href="$1" target="_blank">$1</a>');
 
-	regex = /(^|[^\/])(www\.[\S]+(\b|$))/ig;
-	string = string.replace(regex, '$1<a href="http://$2" target="_blank">$2</a>');
+		regex = /(^|[^\/])(www\.[\S]+(\b|$))/ig;
+		string = string.replace(regex, '$1<a href="http://$2" target="_blank">$2</a>');
 
-	regex = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/ig;
-	string = string.replace(regex, '<a href="mailto:$1">$1</a>');
+		regex = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/ig;
+		string = string.replace(regex, '<a href="mailto:$1">$1</a>');
 
-	regex = /((?:^|\s+))(#[^# ]+)/ig;
-	string = string.replace(regex, '$1<a href="javascript:irc.switch_chans(\'$2\')">$2</a>');
+		regex = /((?:^|\s+))(#[^# ]+)/ig;
+		string = string.replace(regex, '$1<a href="javascript:irc.switch_chans(\'$2\')">$2</a>');
+
+		regex = /\x02([^\x02\x0F]*)(?:\x02|\x0F|$)/ig;
+		string = string.replace(regex, '<span class="bold">$1</span>');
+
+		regex = /\x1F([^\x1F\x0F]*)(?:\x1F|\x0F|$)/ig;
+		string = string.replace(regex, '<span class="underline">$1</strong>');
+
+		regex = /\x16([^\x16\x0F]*)(?:\x16|\x0F|$)/ig;
+		string = string.replace(regex, '<span class="italic">$1</strong>');
+	}
 
 	return string;
 }
@@ -49,7 +66,7 @@ irc.connect = function(form)
 	irc.connected = true;
 	irc.socket.on('message', function(data)
 	{
-		document.getElementById('console_main').innerHTML += '<li>' + data + '</li>';
+		document.getElementById('console_main').innerHTML += '<li>' + html_clean(data, false) + '</li>';
 
 		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) :(.+)$/.exec(data);
 		if (info)
