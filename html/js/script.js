@@ -237,11 +237,15 @@ irc.connect = function(form)
 					return;
 
 				case 'MODE':
-					irc.call_hook('chan_mode', {
-						chan: irc.get_name(info[3]),
-						nick: info[1],
-						mode: info[4]
-					});
+					if (/^#/.test(info[3]))
+					{
+						irc.call_hook('chan_mode', {
+							chan: irc.get_name(info[3]),
+							nick: info[1],
+							mode: info[4]
+						});
+						irc.regen_names(info[3]);
+					}
 					return;
 			}
 		}
