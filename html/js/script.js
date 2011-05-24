@@ -68,7 +68,7 @@ irc.connect = function(form)
 	{
 		document.getElementById('console_main').innerHTML += '<li>' + html_clean(data, false) + '</li>';
 
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) :(.+)$/.exec(data);
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z.\-\/]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) :(.+)$/.exec(data);
 		if (info)
 		{
 			switch (info[2])
@@ -143,7 +143,7 @@ irc.connect = function(form)
 			}
 		}
 
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) ([^: ]+) :?(.+)$/.exec(data);
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z.\-\/]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) ([^: ]+) :?(.+)$/.exec(data);
 		if (info)
 		{
 			switch (info[2])
@@ -246,7 +246,7 @@ irc.connect = function(form)
 			}
 		}
 
-		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z\[\]\\`_\^{|}\-]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) ([^:]+) ([^:]+) :(.+)$/.exec(data);
+		info = /^:([0-9a-zA-Z\[\]\\`_\^{|}\-]+)!~?[0-9a-zA-Z.\-\/]+@[0-9a-zA-Z.\-\/]+ ([A-Z]+) ([^:]+) ([^:]+) :(.+)$/.exec(data);
 		if (info)
 		{
 			switch (info[2])
