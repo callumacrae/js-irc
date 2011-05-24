@@ -230,7 +230,7 @@ irc.connect = function(form)
 
 						irc.call_hook(type, {
 							chan: irc.get_name(them, 'pm'),
-							nick: them,
+							nick: info[1],
 							msg: info[4]
 						});
 					}
