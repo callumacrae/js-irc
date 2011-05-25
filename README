@@ -1,1 +1,4 @@
-A simple IRC bot written in Node.js. It may eventual become an IRC client.
+An IRC client written in Node.js and JavaScript. I will eventually be running it live on an as yet unknown domain.
+
+It is currently release under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0) license:
+http://creativecommons.org/licenses/by-nc-sa/3.0/

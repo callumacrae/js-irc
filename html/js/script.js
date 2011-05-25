@@ -79,6 +79,8 @@ irc.connect = function(form)
 	irc.current_nick = form.nick.value;
 	jQuery('#connect').remove();
 	irc.connected = true;
+	notifier.notify('connected');
+
 	irc.socket.on('message', function(data)
 	{
 		document.getElementById('console_main').innerHTML += '<li>' + html_clean(data, false) + '</li>';
@@ -92,6 +94,9 @@ irc.connect = function(form)
 					if (info[1] === irc.current_nick)
 					{
 						irc.switch_chans(info[3]);
+						notifier.notify('join', {
+							chan: info[3]
+						});
 					}
 					else
 					{
@@ -193,10 +198,26 @@ irc.connect = function(form)
 					}
 					else
 					{
+
 						var them = info[(info[1] === irc.current_nick) ? 3 : 1];
 						if (irc.msgs[them] === undefined)
 						{
 							irc.switch_chans(them);
+							notifier.notify('new_pm', {
+								nick: info[1],
+								msg: (action) ? action[1] : info[4],
+								chan: info[3]
+							});
+						}
+
+
+						if (irc.current_chan != them)
+						{
+							notifier.notify('pm', {
+								nick: info[1],
+								msg: (action) ? action[1] : info[4],
+								chan: info[3]
+							});
 						}
 						var type = (notice) ? 'pm_notice' :
 							('pm_msg' + (highlight ? '_hl' : ''));
@@ -205,6 +226,15 @@ irc.connect = function(form)
 							chan: irc.get_name(them, 'pm'),
 							nick: info[1],
 							msg: info[4]
+						});
+					}
+
+					if (highlight)
+					{
+						notifier.notify('highlight', {
+							nick: info[1],
+							msg: (action) ? action[1] : info[4],
+							chan: info[3]
 						});
 					}
 					return;
@@ -279,6 +309,12 @@ irc.connect = function(form)
 							msg: info[5]
 						});
 						irc.socket.send({msg:'/join ' + info[3], chan:irc.current_chan});
+
+						notifier.notify('kick', {
+							chan: info[3],
+							by: info[1],
+							msg: info[5]
+						});
 					}
 					else
 					{
@@ -353,6 +389,11 @@ irc.connect = function(form)
 						chan: (irc.chans[info[1]] === undefined) ? 'console_main' : irc.get_name(info[1]),
 						msg: 'Could not send to channel: ' + info[2]
 					});
+
+					notifier.notify('chan_error', {
+						chan: info[1],
+						msg: 'Could not send to ' + info[1] + ': ' + info[2]
+					});
 					return;
 
 				case 474:
@@ -361,6 +402,11 @@ irc.connect = function(form)
 					irc.call_hook('chan_error', {
 						chan: (irc.chans[info[1]] === undefined) ? 'console_main' : irc.get_name(info[1]),
 						msg: info[2]
+					});
+
+					notifier.notify('chan_error', {
+						chan: info[1],
+						msg: 'Could not send to ' + info[1] + ': ' + info[2]
 					});
 					return;
 
@@ -373,6 +419,8 @@ irc.connect = function(form)
 		if (irc.connected)
 		{
 			irc.call_hook('global_error', 'Disconnected, please reconnect.');
+
+			notifier.notify('disconnected');
 		}
 	});
 
@@ -561,15 +609,17 @@ irc.connect = function(form)
 					cancel_send = true;
 					break;
 
+				case 'msg':
 				case 'part':
 				case 'query':
-					if (!/^#/.test(irc.current_chan))
+					if (!/^#/.test(irc.current_chan) && rest_of.slice(1) === command)
 					{
 						delete irc.msgs[irc.current_chan];
 						irc.call_hook('pm_close', irc.current_chan);
 						irc.regen_chans();
 						cancel_send = true;
 					}
+					console.log(rest_of.slice(1), command);
 					break;
 			}
 		}
@@ -772,6 +822,72 @@ irc.connect = function(form)
 			event.preventDefault();
 		}
 	});
+}
+
+var notifier = {};
+
+/**
+ * Parses the notification and gives it to the display method,
+ * which decides which method is best to send it with and
+ * sends it to the user.
+ */
+notifier.notify = function(name, data)
+{
+	switch (name)
+	{
+		case 'chan_error':
+			notifier.display('Channel error in ' + data.chan, data.msg);
+			return;
+
+		case 'connected':
+		case 'disconnected':
+			notifier.display('Connection', 'You have ' + name + '.')
+			return;
+
+		case 'highlight':
+			notifier.display('Highlight in ' + data.chan, data.nick + ': ' + data.msg)
+			return;
+
+		case 'join':
+			notifier.display('Channel', 'You have joined ' + data.chan);
+			return;
+
+		case 'new_pm':
+			notifier.display('New private message from ' + data.nick, data.msg);
+			return;
+
+		case 'pm':
+			notifier.display('Private message from ' + data.nick, data.msg);
+			return;
+	}
+}
+
+/**
+ * display is an internal function and should not be used!
+ * Use the notify method to display stuff.
+ */
+if (window.webkitNotifications)
+{
+	if (window.webkitNotifications.checkPermission() !== 0)
+	{
+		window.webkitNotifications.requestPermission();
+	}
+	notifier.display = function(title, msg)
+	{
+		if (window.webkitNotifications.checkPermission() !== 0)
+		{
+			window.webkitNotifications.requestPermission();
+		}
+		window.webkitNotifications.createNotification('', title, msg).show();
+	}
+}
+else
+{
+	notifier.display = function(title, msg)
+	{
+		console.log(title, msg);
+		//so I really cannot be bothered right now. To Chrome!
+	}
 }
 
 /**
