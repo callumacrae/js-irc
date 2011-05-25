@@ -876,13 +876,13 @@ if (window.webkitNotifications)
 	if (window.webkitNotifications.checkPermission() !== 0)
 	{
 		window.webkitNotifications.requestPermission();
-		return;
 	}
 	notifier.display = function(title, msg, click)
 	{
 		if (window.webkitNotifications.checkPermission() !== 0)
 		{
 			window.webkitNotifications.requestPermission();
+			return;
 		}
 		var notification = window.webkitNotifications.createNotification('', title, msg);
 		notification.show();
