@@ -107,7 +107,7 @@ irc.add_hook('chan_usr_quit', function(data)
 
 irc.add_hook('chan_show', function(chan)
 {
-	document.getElementsByTagName('header')[0].innerHTML = '<strong>' + html_clean(chan) + ':</strong> ' + html_clean(irc.chans[chan].topic);
+	document.getElementsByTagName('header')[0].innerHTML = '<strong>' + html_clean(chan, false) + ':</strong> ' + html_clean(irc.chans[chan].topic);
 	jQuery('#' + irc.get_name(chan)).show();
 	jQuery('#' + irc.get_name(chan, 'names')).show();
 });
@@ -130,7 +130,7 @@ irc.add_hook('global_notice', function(msg)
 
 irc.add_hook('global_topic', function(data)
 {
-	document.getElementsByTagName('header')[0].innerHTML = '<strong>' + html_clean(data.chan) + ':</strong> ' + html_clean(data.topic);
+	document.getElementsByTagName('header')[0].innerHTML = '<strong>' + html_clean(data.chan, false) + ':</strong> ' + html_clean(data.topic);
 });
 
 irc.add_hook('pm_close', function(nick)

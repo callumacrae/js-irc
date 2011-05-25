@@ -822,6 +822,11 @@ irc.connect = function(form)
 			event.preventDefault();
 		}
 	});
+
+	$('#msginput').blur(function()
+	{
+		$('msginput').focus()
+	});
 }
 
 var notifier = {};
@@ -836,7 +841,7 @@ notifier.notify = function(name, data)
 	switch (name)
 	{
 		case 'chan_error':
-			notifier.display('Channel error in ' + data.chan, data.msg);
+			notifier.display('Channel error in ' + data.chan, data.msg, data.chan);
 			return;
 
 		case 'connected':
@@ -845,19 +850,19 @@ notifier.notify = function(name, data)
 			return;
 
 		case 'highlight':
-			notifier.display('Highlight in ' + data.chan, data.nick + ': ' + data.msg)
+			notifier.display('Highlight in ' + data.chan, data.nick + ': ' + data.msg, data.chan)
 			return;
 
 		case 'join':
-			notifier.display('Channel', 'You have joined ' + data.chan);
+			notifier.display('Channel', 'You have joined ' + data.chan, data.chan);
 			return;
 
 		case 'new_pm':
-			notifier.display('New private message from ' + data.nick, data.msg);
+			notifier.display('New private message from ' + data.nick, data.msg, data.nick);
 			return;
 
 		case 'pm':
-			notifier.display('Private message from ' + data.nick, data.msg);
+			notifier.display('Private message from ' + data.nick, data.msg, data.nick);
 			return;
 	}
 }
@@ -871,22 +876,40 @@ if (window.webkitNotifications)
 	if (window.webkitNotifications.checkPermission() !== 0)
 	{
 		window.webkitNotifications.requestPermission();
+		return;
 	}
-	notifier.display = function(title, msg)
+	notifier.display = function(title, msg, click)
 	{
 		if (window.webkitNotifications.checkPermission() !== 0)
 		{
 			window.webkitNotifications.requestPermission();
 		}
-		window.webkitNotifications.createNotification('', title, msg).show();
+		var notification = window.webkitNotifications.createNotification('', title, msg);
+		notification.show();
+		notification.ondisplay = function()
+		{
+			setTimeout(function()
+			{
+				notification.cancel();
+			}, 4000);
+		};
+		notification.onclick = function()
+		{
+			if (click !== undefined)
+			{
+				irc.switch_chans(click);
+			}
+			notification.cancel();
+		}
 	}
 }
 else
 {
 	notifier.display = function(title, msg)
 	{
-		console.log(title, msg);
-		//so I really cannot be bothered right now. To Chrome!
+		jQuery.jGrowl(msg, {
+			header: title
+		});
 	}
 }
 
