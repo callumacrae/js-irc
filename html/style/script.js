@@ -177,6 +177,11 @@ irc.add_hook('pm_show', function(chan)
 	jQuery('#' + irc.get_name(chan, 'pm')).show();
 });
 
+irc.add_hook('probably_ie', function(chan)
+{
+	document.getElementById('console_main').innerHTML += '<li><strong style="color:red">The browser that you\'re currently using doesn\'t support the standards such as .addEventListener, so it probably won\'t work. Please try a real browser such as Chrome.</strong></li>';
+});
+
 irc.add_hook('quit', function(msg)
 {
 	for (var chan in irc.chans)

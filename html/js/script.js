@@ -69,6 +69,12 @@ function html_clean(string, format)
 
 irc.connect = function(form)
 {
+	var input = document.getElementById('msginput');
+	if (input.addEventListener === undefined)
+	{
+		irc.call_hook('probably_ie');
+	}
+
 	/**
 	 * Lots of sockets stuff for a bit.
 	 */
