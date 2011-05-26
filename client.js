@@ -151,7 +151,6 @@ socket.on('connection', function(client)
 					client.irc.raw(rest_of);
 					break;
 
-				case 'q':
 				case 'quit':
 					client.irc.raw('QUIT :https://github.com/callumacrae/js-irc/').disconnect();
 					write('Disconnected from ' + client.irc_info.server);

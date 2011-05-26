@@ -611,6 +611,10 @@ irc.connect = function(form)
 			var end = form.msg.value.indexOf(' ') === -1 ? form.msg.value.length : form.msg.value.indexOf(' ');
 			var command = form.msg.value.slice(1, end);
 			var rest_of = form.msg.value.slice(form.msg.value.indexOf(' ') + 1);
+			if (rest_of.slice(1) === command)
+			{
+				rest_of = null;
+			}
 			switch (command)
 			{
 				case 'about':
@@ -621,6 +625,7 @@ irc.connect = function(form)
 				case 'msg':
 				case 'part':
 				case 'query':
+				case 'q':
 					if (!/^#/.test(irc.current_chan) && rest_of.slice(1) === command)
 					{
 						delete irc.msgs[irc.current_chan];
