@@ -62,13 +62,15 @@ server = http.createServer(function (req, res)
 });
 server.listen(options.server.port, options.server.address);
 
+var log = fs.createWriteStream('log', {'flags': 'a'});
 function write(text)
 {
 	var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 	var d = new Date();
-	var date = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+	var date = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + ((d.getSeconds() < 10) ? '0' + d.getSeconds() : d.getSeconds());
 
 	console.log(date + ' - ' + text);
+	log.write(date + ' - ' + text + '\n');
 }
 
 var socket = io.listen(server);
@@ -99,8 +101,7 @@ socket.on('connection', function(client)
 					client.irc.connect();
 					client.irc.on('error', function(data)
 					{
-						write('An error occurred:');
-						console.log(data);
+						write('An error occurred: ' + data.params);
 					});
 					client.irc_connected = true;
 					return true;
