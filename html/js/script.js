@@ -316,6 +316,8 @@ irc.connect = function(form)
 							by: info[1],
 							msg: info[5]
 						});
+
+						irc.chans[info[3]].names = [];
 					}
 					else
 					{
