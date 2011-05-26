@@ -33,6 +33,11 @@ irc.add_hook('chan_join', function(chan)
 	document.getElementById('right_names').innerHTML += '<ul id="' + irc.get_name(chan, 'names') + '"></ul>';
 });
 
+irc.add_hook('chan_join_msg', function(chan)
+{
+	document.getElementById(chan).innerHTML += '<li><strong>You have joined the channel</strong></li>';
+});
+
 irc.add_hook('chan_kick', function(data)
 {
 	document.getElementById(data.chan).innerHTML += '<li>You were kicked from the channel by ' + data.by + '. (' + html_clean(data.msg) + ')</li><li>Rejoining...</li>';
@@ -48,7 +53,7 @@ irc.add_hook('chan_mode', function(data)
 irc.add_hook('chan_msg', function(data)
 {
 	document.getElementById(data.chan).innerHTML += '<li><strong>' + data.nick + '</strong>: ' + html_clean(data.msg) + '</li>';
-	window.scrollBy(0, 15);
+	window.scrollBy(0, 15)
 });
 
 irc.add_hook('chan_msg_hl', function(data)

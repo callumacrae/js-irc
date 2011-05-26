@@ -94,6 +94,7 @@ irc.connect = function(form)
 					if (info[1] === irc.current_nick)
 					{
 						irc.switch_chans(info[3]);
+						irc.call_hook('chan_join_msg', irc.get_name(info[3]));
 						notifier.notify('join', {
 							chan: info[3]
 						});
