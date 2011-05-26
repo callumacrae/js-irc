@@ -839,7 +839,7 @@ irc.connect = function(form)
 
 	$('#msginput').blur(function()
 	{
-		$('msginput').focus()
+		$('#msginput').focus();
 	});
 }
 
