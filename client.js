@@ -1,5 +1,5 @@
 var options = require('./config'),
-	IRC = require('./lib/lib'),
+	IRC = require('irc'),
 	url = require('url'),
 	io = require('socket.io'),
 	http = require('http'),
@@ -98,11 +98,6 @@ socket.on('connection', function(client)
 					client.irc_info = data;
 					write('Connecting to ' + data.server);
 					client.irc = new IRC(options.irc, client);
-					client.irc.connect();
-					client.irc.on('error', function(data)
-					{
-						write('An error occurred: ' + data.params);
-					});
 					client.irc_connected = true;
 					return true;
 				});
@@ -153,7 +148,7 @@ socket.on('connection', function(client)
 					break;
 
 				case 'quit':
-					client.irc.raw('QUIT :https://github.com/callumacrae/js-irc/').disconnect();
+					client.irc.quit('https://github.com/callumacrae/js-irc/');
 					write('Disconnected from ' + client.irc_info.server);
 					client.irc_connected = false;
 					break;
@@ -169,7 +164,7 @@ socket.on('connection', function(client)
 			{
 				data.msg = data.msg.slice(1, data.msg.length);
 			}
-			client.irc.privmsg(data.chan, data.msg);
+			client.irc.raw('PRIVMSG ' + data.chan + ' :' + data.msg);
 		}
 		return true;
 	});
@@ -178,7 +173,7 @@ socket.on('connection', function(client)
 	{
 		if (client.irc_connected)
 		{
-			client.irc.raw('QUIT :https://github.com/callumacrae/js-irc/').disconnect();
+			client.irc.quit('https://github.com/callumacrae/js-irc/');
 			write('Disconnected from ' + client.irc_info.server);
 		}
 	});
