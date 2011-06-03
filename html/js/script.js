@@ -75,6 +75,11 @@ irc.connect = function(form)
 		irc.call_hook('probably_ie');
 	}
 
+	storage.set('server', {
+		server: form.server.value,
+		nick: form.nick.value
+	});
+
 	/**
 	 * Lots of sockets stuff for a bit.
 	 */
@@ -428,7 +433,6 @@ irc.connect = function(form)
 		if (irc.connected)
 		{
 			irc.call_hook('global_error', 'Disconnected, please reconnect.');
-
 			notifier.notify('disconnected');
 		}
 	});
@@ -922,6 +926,89 @@ else
 			header: title
 		});
 	}
+}
+
+var storage = {};
+if (window.localStorage)
+{
+	storage.get = function(name)
+	{
+		if (window.localStorage[name] === undefined)
+		{
+			return undefined;
+		}
+		return JSON.parse(window.localStorage[name]);
+	}
+
+	storage.set = function(name, data)
+	{
+		window.localStorage[name] = JSON.stringify(data);
+	}
+
+	storage.rem = function(name)
+	{
+		delete window.localStorage[name];
+	}
+
+	storage.is = function(name)
+	{
+		return !(window.localStorage[name] === undefined);
+	}
+}
+else
+{
+	//boring cookies
+	storage.get = function(name)
+	{
+		var i, cookies, cookie
+		name = name + '=';
+		cookies = document.cookie.split(';');
+		for (i = 0; i < cookies.length; i++)
+		{
+			while (cookies[i].slice(0, 1) === ' ')
+			{
+				cookies[i] = cookies[i].slice(1);
+			}
+			if (cookies[i].indexOf(name) === 0)
+			{
+				return JSON.parse(cookies[i].slice(name.length));
+			}
+		}
+		return undefined;
+	}
+
+	storage.set = function(name, data)
+	{
+		var date = new Date();
+		date.setTime(date.getTime() + 2592000000);
+		var expires = '; expires=' + date.toGMTString();
+
+		data = JSON.stringify(data);
+
+		document.cookie = name + '=' + data + expires + '; path=/';
+	}
+
+	storage.rem = function(name)
+	{
+		var date = new Date();
+		date.setTime(date.getTime() - 1);
+		var expires = date.toGMTString();
+
+		document.cookie = name + '= ; expires=' + expires + '; path=/';
+	}
+
+	storage.is = function(name)
+	{
+		return !(storage.get(name) === undefined);
+	}
+}
+
+if (storage.is('server'))
+{
+	var form = document.getElementById('connect').getElementsByTagName('form')[0];
+	var server = storage.get('server');
+	form.elements[0].value = server.server;
+	form.elements[1].value = server.nick;
 }
 
 /**
