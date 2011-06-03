@@ -679,6 +679,7 @@ irc.connect = function(form)
 			irc.call_hook('pm_show', chan);
 			irc.current_type = 'pm';
 		}
+		$('#msginput').focus();
 		irc.current_chan = chan;
 	}
 
@@ -828,6 +829,7 @@ irc.connect = function(form)
 				{
 					irc.prev_msgs.current = 0;
 				}
+				$('#msginput').focus();
 				kill = false;
 		}
 
@@ -835,11 +837,6 @@ irc.connect = function(form)
 		{
 			event.preventDefault();
 		}
-	});
-
-	$('#msginput').blur(function()
-	{
-		$('#msginput').focus();
 	});
 }
 
