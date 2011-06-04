@@ -67,7 +67,7 @@ function html_clean(string, format)
 	return string;
 }
 
-irc.connect = function(form)
+irc.connect = function(server, nick)
 {
 	var input = document.getElementById('msginput');
 	if (input.addEventListener === undefined)
@@ -75,20 +75,14 @@ irc.connect = function(form)
 		irc.call_hook('probably_ie');
 	}
 
-	storage.set('server', {
-		server: form.server.value,
-		nick: form.nick.value
-	});
-
 	/**
 	 * Lots of sockets stuff for a bit.
 	 */
 
 	irc.socket = new io.Socket(config.ip, {port:config.port});
 	irc.socket.connect();
-	irc.socket.send({server:form.server.value, nick:form.nick.value});
-	irc.current_nick = form.nick.value;
-	jQuery('#connect').remove();
+	irc.socket.send({server: server, nick: nick});
+	irc.current_nick = nick;
 	irc.connected = true;
 	notifier.notify('connected');
 
@@ -1003,13 +997,52 @@ else
 	}
 }
 
-if (storage.is('server'))
+if (storage.is('settings'))
 {
-	var form = document.getElementById('connect').getElementsByTagName('form')[0];
-	var server = storage.get('server');
+	var form = document.getElementById('settings').getElementsByTagName('form')[0];
+	var server = storage.get('settings');
 	form.elements[0].value = server.server;
 	form.elements[1].value = server.nick;
+	form.elements[2].checked = server.auto;
+
+	if (server.auto === true)
+	{
+		$('#settings').hide();
+		irc.connect(server.server, server.nick);
+	}
+	else
+	{
+		console.log(server.auto);
+		form.elements[3].value = 'Connect';
+		$('#settings form').one('submit', function()
+		{
+			this[3].value = 'Save';
+		});
+	}
 }
+
+$('#settings form').bind('submit', function(event)
+{
+	event.preventDefault();
+
+	storage.set('settings', {
+		server: this[0].value,
+		nick: this[1].value,
+		auto: this[2].checked
+	});
+	$('#settings').hide();
+
+	if (!irc.connected)
+	{
+		irc.connect(this[0].value, this[1].value);
+	}
+});
+
+$('#setlink').bind('click', function(event)
+{
+	event.preventDefault();
+	$('#settings').show();
+});
 
 /**
  * The hooks stuff.

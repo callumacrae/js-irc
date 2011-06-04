@@ -216,7 +216,7 @@ div #right_names {
   border-left: 1px black solid;
 }
 
-div#connect {
+div#settings {
   position: relative;
   top: 100px;
   height: 130px;
@@ -228,7 +228,7 @@ div#connect {
   padding-top: 50px;
 }
 
-div#connect p {
+div#settings p {
   padding: 5px;
 }
 
